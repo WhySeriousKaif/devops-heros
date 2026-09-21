@@ -28,5 +28,11 @@ docker rmi -f $(docker images -q)
 For a complete Docker cleanup:
 docker system prune -a
 
+---
+
+## 📝 Homework
+
+Homework for this session: [`homework/docker-fundamentals/`](./homework/docker-fundamentals/README.md) & [`homework/docker-images/`](./homework/docker-images/README.md) — ✅ Completed
+
 
 
