@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 COPY --chown=appuser:appuser app.py .
 
-USER appuser
+USER 10001:10001
 
 EXPOSE 8080
 
