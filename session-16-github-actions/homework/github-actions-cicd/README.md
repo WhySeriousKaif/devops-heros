@@ -79,6 +79,7 @@ devops-heros/
             ├── .gitignore
             ├── requirements.txt
             ├── requirements-dev.txt
+            ├── pytest.ini
             ├── tests/
             │   └── test_app.py
             ├── screenshots/
@@ -163,9 +164,14 @@ Stop the application with `Ctrl+C`.
 ```bash
 docker build -t session16-cicd:local .
 docker run -d --name session16-cicd -p 8080:8080 session16-cicd:local
-docker ps
+
+until curl --fail http://localhost:8080/health; do
+  sleep 1
+done
+
 curl http://localhost:8080/
 curl http://localhost:8080/health
+docker ps
 docker logs session16-cicd
 docker rm -f session16-cicd
 ```
