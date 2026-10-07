@@ -1,6 +1,6 @@
-# Session 17: Complete CI/CD and DevSecOps — Homework
+# Session 17: Complete CI/CD and DevSecOps
 
-> **Status:** Work in progress — execute the pipeline and replace the screenshot placeholders before submission.
+> **Status:** Run the commands below, capture the six screenshots, and add them to `screenshots/`.
 
 ## Student Information
 
@@ -10,161 +10,324 @@
 
 ## Project Overview
 
-This project demonstrates a secure software delivery pipeline. Code must compile and pass tests and security checks before a container image is pushed to a registry and deployed to Kubernetes.
+This is a small Flask application with a complete CI/CD and DevSecOps pipeline. Every quality and security check must pass before the image is pushed to GitHub Container Registry and deployed to Kubernetes.
 
-The implementation files are in [`session-17-devsecops/demo`](../../demo/).
-
-## Expected Pipeline
+## Pipeline Flow
 
 ```text
 Code
   |
   v
-Build -> Unit Test -> SAST -> SCA -> Secret Scan
-                                      |
-                                      v
-                                 Docker Build
-                                      |
-                                      v
-                            Container Image Scan
-                                      |
-                                      v
-                                Security Gate
-                                      |
-                             +--------+--------+
-                             |                 |
-                           fail              pass
-                             |                 |
-                       stop pipeline      Push to GHCR
-                                               |
-                                               v
-                                      Deploy to Kubernetes
+Build
+  |
+  v
+Unit Test
+  |
+  v
+SAST (Bandit)
+  |
+  v
+SCA (pip-audit)
+  |
+  v
+Secret Scan (Gitleaks)
+  |
+  v
+Docker Build
+  |
+  v
+Container Scan (Trivy)
+  |
+  v
+Security Gate
+  |
+  v
+Push Image to GHCR
+  |
+  v
+Deploy to Kubernetes (Kind)
 ```
 
-## Technologies
+If build, tests, or any security gate fails, the later stages do not run.
 
-| Area | Tool / approach |
+## Tools
+
+| Requirement | Tool |
 |---|---|
-| Application | Python application and Pytest |
-| CI/CD | GitHub Actions |
-| SAST | Bandit or CodeQL |
-| SCA | `pip-audit` / dependency review |
+| Application build | Python compile check |
+| Unit testing | Pytest |
+| SAST | Bandit |
+| SCA | pip-audit |
 | Secret scanning | Gitleaks |
-| Image scanning | Trivy |
-| Registry | GitHub Container Registry (GHCR) |
-| Deployment | Kubernetes manifests and `kubectl` |
+| Container build | Docker |
+| Container scanning | Trivy |
+| Container registry | GitHub Container Registry |
+| Kubernetes deployment | Kind, kubectl, manifests |
+| Automation | GitHub Actions |
 
 ## Folder Structure
 
 ```text
-devsecops-demo-project/
-├── README.md
-└── screenshots/
-    ├── png1.png   # Complete successful pipeline
-    ├── png2.png   # Unit test and SAST results
-    ├── png3.png   # SCA and secret-scan results
-    ├── png4.png   # Trivy image scan and security gate
-    ├── png5.png   # Image in container registry
-    └── png6.png   # Kubernetes deployment verification
+devops-heros/
+├── .github/
+│   └── workflows/
+│       └── session17-devsecops.yml
+└── session-17-devsecops/
+    └── homework/
+        └── devsecops-demo-project/
+            ├── app.py
+            ├── Dockerfile
+            ├── requirements.txt
+            ├── requirements-dev.txt
+            ├── pytest.ini
+            ├── tests/
+            │   └── test_app.py
+            ├── security/
+            │   ├── bandit.yaml
+            │   ├── gitleaks.toml
+            │   └── trivy.yaml
+            ├── kubernetes/
+            │   ├── namespace.yaml
+            │   ├── deployment.yaml
+            │   └── service.yaml
+            ├── screenshots/
+            │   ├── png1.png
+            │   ├── png2.png
+            │   ├── png3.png
+            │   ├── png4.png
+            │   ├── png5.png
+            │   └── png6.png
+            └── README.md
 ```
 
-## Run Locally
+## Application Endpoints
+
+- `/` — application information.
+- `/health` — liveness response.
+- `/ready` — readiness response.
+
+## Commands to Run
+
+### 1. Open the Project
 
 ```bash
-cd session-17-devsecops/demo
+cd /Users/mdkaif/devops-heros/session-17-devsecops/homework/devsecops-demo-project
+```
+
+### 2. Create the Python Environment
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 pip install -r requirements.txt -r requirements-dev.txt
-pytest -v
 ```
 
-Build and test the container:
+### 3. Build and Unit Test
 
 ```bash
-docker build -t devsecops-demo:local .
-docker run --rm -p 8080:8080 devsecops-demo:local
-curl http://localhost:8080/health
+clear
+python -m compileall app.py
+python -m pytest -v
 ```
 
-## Security Checks
+Expected result:
 
-### SAST
-
-Static application security testing inspects source code without executing it.
-
-```bash
-bandit -r app -ll
+```text
+4 passed
 ```
 
-### SCA
+**Take Screenshot 1 now.** Save it as `screenshots/png1.png`.
 
-Software composition analysis identifies known vulnerabilities in third-party dependencies.
+### 4. Run SAST and SCA
 
 ```bash
+clear
+bandit -c security/bandit.yaml -r app.py -ll
 pip-audit -r requirements.txt
 ```
 
-### Secret Scanning
+Expected results include:
 
-Secret scanning detects credentials, tokens, and private keys committed accidentally.
-
-```bash
-gitleaks detect --source . --redact --verbose
+```text
+No issues identified.
+No known vulnerabilities found
 ```
 
-### Container Image Scanning
+**Take Screenshot 2 now.** Save it as `screenshots/png2.png`.
+
+### 5. Run Secret Scanning
+
+Install Gitleaks once if it is unavailable:
 
 ```bash
-trivy image --severity HIGH,CRITICAL --exit-code 1 devsecops-demo:local
+brew install gitleaks
 ```
 
-The non-zero exit code is the security gate: a high or critical finding stops promotion. Any documented exception should be time-limited and approved; the scan should not be silently disabled.
-
-## Registry and Kubernetes Deployment
-
-The workflow should authenticate using `GITHUB_TOKEN`, tag the verified image with an immutable commit SHA, and push it to GHCR only after all gates pass.
+Run the scan:
 
 ```bash
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-kubectl rollout status deployment/devsecops-demo
-kubectl get pods,svc
-kubectl describe deployment devsecops-demo
+clear
+gitleaks detect \
+  --source . \
+  --no-git \
+  --config security/gitleaks.toml \
+  --redact \
+  --verbose
 ```
 
-Use the exact deployment and service names defined in the manifests if they differ from the examples above.
+The command must finish without detecting a secret.
 
-## Security Gate Test
+### 6. Build and Scan the Container
 
-1. Introduce a safe test fixture that a scanner will flag.
-2. Run the workflow and verify the relevant job fails.
-3. Remove the fixture.
-4. Rerun the workflow.
-5. Confirm that image push and deployment occur only on the clean run.
+Install Trivy once if it is unavailable:
 
-Never commit a real credential for this demonstration.
+```bash
+brew install trivy
+```
+
+Build and scan:
+
+```bash
+docker build -t session17-devsecops:local .
+trivy image --config security/trivy.yaml session17-devsecops:local
+```
+
+The scan is the container security gate. A critical vulnerability causes a non-zero exit code and stops the pipeline.
+
+**Take Screenshot 3 now.** Capture the successful Gitleaks and Trivy results and save it as `screenshots/png3.png`.
+
+### 7. Test the Container Locally
+
+```bash
+docker rm -f session17-devsecops 2>/dev/null || true
+docker run -d --name session17-devsecops -p 8080:8080 session17-devsecops:local
+
+until curl --fail http://localhost:8080/health; do
+  sleep 1
+done
+
+curl http://localhost:8080/
+curl http://localhost:8080/ready
+docker ps
+docker logs session17-devsecops
+docker rm -f session17-devsecops
+```
+
+### 8. Commit and Trigger the Pipeline
+
+```bash
+cd /Users/mdkaif/devops-heros
+
+git add .github/workflows/session17-devsecops.yml
+git add session-17-devsecops/homework/devsecops-demo-project
+git commit -m "complete session 17 DevSecOps project"
+git push origin main
+```
+
+Open the workflow page:
+
+```text
+https://github.com/WhySeriousKaif/devops-heros/actions/workflows/session17-devsecops.yml
+```
+
+Wait until every job is green.
+
+**Take Screenshot 4 now.** Capture the complete successful workflow graph and save it as `screenshots/png4.png`.
+
+### 9. Capture Security Gate Evidence
+
+Open the successful workflow run and expand these jobs or steps:
+
+- `SAST - Bandit`
+- `SCA - pip-audit`
+- `Secret Scan - Gitleaks`
+- `Container Scan - Trivy Security Gate`
+
+**Take Screenshot 5 now.** Save it as `screenshots/png5.png`.
+
+### 10. Capture Registry and Kubernetes Evidence
+
+In the delivery job, expand the following steps:
+
+- `Push verified image to GHCR`
+- `Deploy to Kubernetes`
+- `Verify Kubernetes deployment`
+
+The verification output should show two ready application pods and the service.
+
+The package is also available from the repository's **Packages** section after a successful `main` run.
+
+**Take Screenshot 6 now.** Save it as `screenshots/png6.png`.
+
+## Security Gates
+
+| Gate | Failure condition | Result |
+|---|---|---|
+| Unit test | Any failed test | Pipeline stops |
+| SAST | Medium/high-confidence code issue | Pipeline stops |
+| SCA | Known vulnerable Python dependency | Pipeline stops |
+| Secret scan | Credential or token pattern detected | Pipeline stops |
+| Image scan | Fixable critical vulnerability detected | Pipeline stops |
+
+Do not add real credentials to test secret scanning. A deliberately fake test value should be removed before the final successful run.
+
+## Kubernetes Deployment
+
+The workflow creates an ephemeral Kind cluster, loads the verified local image, applies the manifests, checks rollout status, verifies the health endpoint, and removes the runner automatically when the job finishes.
+
+This provides a repeatable Kubernetes deployment without requiring cloud credentials.
 
 ## Screenshots
 
-```markdown
-![Successful pipeline](screenshots/png1.png)
-![Tests and SAST](screenshots/png2.png)
-![SCA and secret scan](screenshots/png3.png)
-![Image scan and gate](screenshots/png4.png)
-![Container registry](screenshots/png5.png)
-![Kubernetes deployment](screenshots/png6.png)
+### Build and Unit Tests
+
+![Build and unit tests](screenshots/png1.png)
+
+### SAST and SCA
+
+![SAST and SCA](screenshots/png2.png)
+
+### Secret and Container Scanning
+
+![Secret and container scanning](screenshots/png3.png)
+
+### Successful Pipeline
+
+![Successful DevSecOps pipeline](screenshots/png4.png)
+
+### Security Gates
+
+![Security gates](screenshots/png5.png)
+
+### Registry and Kubernetes Deployment
+
+![Registry and Kubernetes deployment](screenshots/png6.png)
+
+## Push the Screenshots
+
+After saving all six files:
+
+```bash
+cd /Users/mdkaif/devops-heros
+git add session-17-devsecops/homework/devsecops-demo-project/screenshots
+git commit -m "add session 17 DevSecOps screenshots"
+git push origin main
 ```
 
 ## Deliverables Checklist
 
-- [ ] Application build and unit tests pass.
-- [ ] SAST, SCA, secret scanning, and image scanning run.
-- [ ] Security gates block unacceptable findings.
-- [ ] Verified image is pushed to the registry.
-- [ ] Kubernetes rollout completes successfully.
-- [ ] Pipeline logs and deployment screenshots are added.
-- [x] Pipeline workflow and security process are documented.
+- [x] Application source code
+- [x] Dockerfile
+- [x] GitHub Actions workflow
+- [x] Unit tests
+- [x] SAST, SCA, secret, and image scanning
+- [x] Security gates
+- [x] GHCR image publishing
+- [x] Kubernetes manifests and deployment job
+- [x] Security tool configuration
+- [ ] Successful pipeline screenshots
+- [x] Complete README
 
 ---
 

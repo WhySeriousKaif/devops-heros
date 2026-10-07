@@ -1,0 +1,8 @@
+title = "Session 17 Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Ignore generated screenshots"
+paths = ['''screenshots/.*''']
