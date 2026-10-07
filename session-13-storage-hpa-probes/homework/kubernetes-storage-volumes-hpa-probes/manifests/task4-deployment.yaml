@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task4-demo
+  labels:
+    app: task4-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: task4-demo
+  template:
+    metadata:
+      labels:
+        app: task4-demo
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

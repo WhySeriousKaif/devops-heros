@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <!-- Background -->
+  <rect width="800" height="500" fill="#f6f3ec"/>
+  <rect x="0" y="458" width="800" height="12" fill="#d9d4c6"/>
+
+  <!-- Shadows -->
+  <ellipse cx="250" cy="462" rx="62" ry="10" fill="#000000" opacity="0.08"/>
+  <ellipse cx="548" cy="462" rx="62" ry="10" fill="#000000" opacity="0.08"/>
+
+  <!-- ===================== Victim (right, head knocked sideways) ===================== -->
+  <!-- Neck -->
+  <rect x="528" y="208" width="24" height="20" rx="6" fill="#f1c27d"/>
+  <!-- Body -->
+  <rect x="505" y="222" width="90" height="140" rx="18" fill="#d9534f"/>
+  <!-- Arms flailing -->
+  <path d="M 512 255 Q 495 295 470 310" stroke="#d9534f" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <ellipse cx="464" cy="316" rx="13" ry="10" fill="#f1c27d" transform="rotate(-30 464 316)"/>
+  <path d="M 588 255 Q 615 290 610 325" stroke="#d9534f" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <ellipse cx="612" cy="333" rx="13" ry="10" fill="#f1c27d" transform="rotate(25 612 333)"/>
+  <!-- Legs -->
+  <rect x="512" y="352" width="28" height="105" rx="6" fill="#34495e"/>
+  <rect x="560" y="352" width="28" height="105" rx="6" fill="#34495e"/>
+  <ellipse cx="520" cy="460" rx="24" ry="9" fill="#2c3e50"/>
+  <ellipse cx="568" cy="460" rx="24" ry="9" fill="#2c3e50"/>
+
+  <!-- Head (tilted by the slap) -->
+  <g transform="rotate(10 540 175)">
+    <circle cx="540" cy="175" r="42" fill="#f1c27d"/>
+    <path d="M 500 162 Q 506 124 540 120 Q 574 124 580 162 Q 568 140 540 140 Q 512 140 500 162 Z" fill="#2c2c34"/>
+    <!-- Wincing closed eye -->
+    <path d="M 508 170 Q 516 177 524 170" stroke="#333333" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <!-- Ouch mouth -->
+    <ellipse cx="514" cy="192" rx="6" ry="8" fill="#7a3b2e"/>
+    <!-- Red slap streaks on cheek -->
+    <path d="M 500 160 L 486 154" stroke="#e74c3c" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M 502 179 L 488 177" stroke="#e74c3c" stroke-width="4.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- ===================== Slapper (left) ===================== -->
+  <!-- Neck -->
+  <rect x="238" y="206" width="24" height="20" rx="6" fill="#f1c27d"/>
+  <!-- Body -->
+  <rect x="205" y="222" width="90" height="140" rx="18" fill="#3b82c4"/>
+  <!-- Far arm (behind, down at side) -->
+  <path d="M 218 252 Q 196 290 200 322" stroke="#3b82c4" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <ellipse cx="202" cy="330" rx="12" ry="10" fill="#f1c27d"/>
+  <!-- Legs -->
+  <rect x="212" y="352" width="28" height="105" rx="6" fill="#34495e"/>
+  <rect x="260" y="352" width="28" height="105" rx="6" fill="#34495e"/>
+  <ellipse cx="224" cy="460" rx="24" ry="9" fill="#2c3e50"/>
+  <ellipse cx="274" cy="460" rx="24" ry="9" fill="#2c3e50"/>
+
+  <!-- Head -->
+  <circle cx="250" cy="175" r="42" fill="#f1c27d"/>
+  <path d="M 210 162 Q 216 124 250 120 Q 286 124 292 162 Q 278 140 250 140 Q 222 140 210 162 Z" fill="#4a3728"/>
+  <!-- Angry eyebrow + eye -->
+  <path d="M 258 154 L 278 160" stroke="#333333" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="272" cy="170" r="4" fill="#333333"/>
+  <!-- Gritted mouth -->
+  <path d="M 260 192 Q 272 198 284 190" stroke="#333333" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Extended slapping arm -->
+  <path d="M 285 252 Q 340 232 390 198" stroke="#3b82c4" stroke-width="22" fill="none" stroke-linecap="round"/>
+  <ellipse cx="404" cy="192" rx="17" ry="13" fill="#f1c27d" transform="rotate(-25 404 192)"/>
+
+  <!-- Motion lines (whip of the arm) -->
+  <path d="M 322 148 Q 352 162 372 180" stroke="#9aa5b1" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M 312 180 Q 345 185 368 190" stroke="#9aa5b1" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M 322 212 Q 350 202 370 198" stroke="#9aa5b1" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- Impact burst -->
+  <polygon points="470,180 448,188 458,208 438,198 430,220 422,198 402,208 412,188 390,180 412,172 402,152 422,162 430,140 438,162 458,152 448,172"
+           fill="#ffcc00" stroke="#e67e22" stroke-width="3" stroke-linejoin="round"/>
+  <text x="430" y="108" font-family="'Comic Sans MS', 'Segoe UI', sans-serif" font-size="36" font-weight="bold"
+        fill="#e67e22" text-anchor="middle" transform="rotate(-8 430 108)">SMACK!</text>
+</svg>

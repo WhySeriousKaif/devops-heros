@@ -1,8 +1,6 @@
 # Helm — Kubernetes Package Manager: DevOps Homework
 
-> **⏳ STATUS: PENDING — Work In Progress.** This module corresponds to **Session 15** (`session-15-helm/`). Tasks will be documented here with execution screenshots once the lab is completed.
-
-A practical laboratory covering Helm fundamentals: charts, `Chart.yaml`, `values.yaml` overrides, Go templating, `helm install/upgrade`, release history, rollback of a bad upgrade, and packaging & deploying a real application (guestbook / notes app).
+> **Status:** Ready for submission. Screenshots are in `screenshots/` and embedded below.
 
 ---
 
@@ -14,52 +12,178 @@ A practical laboratory covering Helm fundamentals: charts, `Chart.yaml`, `values
 
 ---
 
-## Session Reference
-
-All session materials, charts and guides live in [`session-15-helm/`](../../session-15-helm/):
-
-| Session Topic | Material |
-|---|---|
-| What is Helm? | `01-what-is-helm/` |
-| Helm Charts | `02-helm-charts/` |
-| Chart Structure | `03-chart-structure/` |
-| Chart.yaml | `04-chart-yaml/` |
-| values.yaml | `05-values-yaml/` |
-| Templates | `06-templates/` |
-| Install & Upgrade | `07-install-upgrade/` |
-| Rollback | `08-rollback/` |
-| Deploying an Application | `09-deploying-application/` |
-| Capstone | `mini-project/` |
-
----
-
-## Homework Task Checklist
-
-- [ ] **Task 1:** Create the `notes-chart` from scratch (Chart.yaml, values.yaml, values-prod.yaml, deployment/service/configmap templates).
-- [ ] **Task 2:** Lint and render the chart locally (`helm lint`, `helm template`) and verify all `{{ }}` placeholders resolve.
-- [ ] **Task 3:** `helm install notes-dev` (development values) and verify Pod, Service and ConfigMap.
-- [ ] **Task 4:** `helm upgrade` with `values-prod.yaml` (3 replicas, different image tag) and verify revision 2.
-- [ ] **Task 5:** Simulate a bad upgrade (`--set image.tag=broken-tag-does-not-exist`) → capture ImagePullBackOff.
-- [ ] **Task 6:** `helm rollback notes-dev 2` and verify pods are healthy again; show `helm history`.
-- [ ] **Task 7:** Clean up with `helm uninstall` and verify all resources are gone.
-
-## Planned Repository Structure
+## Folder Structure
 
 ```text
 helm-package-manager/
-├── README.md                    # This documentation (to be completed)
-├── notes-chart/                 # Packaged chart (Chart.yaml, values*.yaml, templates/)
-└── screenshots/                 # install/upgrade/rollback/release-history proofs (png1–pngN)
+├── README.md
+├── notes-chart/
+│   ├── Chart.yaml
+│   ├── values.yaml
+│   ├── values-prod.yaml
+│   └── templates/
+│       ├── deployment.yaml
+│       ├── service.yaml
+│       └── configmap.yaml
+└── screenshots/
+    ├── png1.png   # Task 1 - helm command practice
+    ├── png2.png   # Task 1 - helm create / helm lint / helm template
+    ├── png3.png   # Task 2 - install + status + list
+    ├── png4.png   # Task 2 - upgrade + history
+    ├── png5.png   # Task 2 - bad upgrade / ImagePullBackOff
+    ├── png6.png   # Task 2 - rollback + verify
+    └── png7.png   # Task 3 - mini project
 ```
 
 ---
 
-## Execution & Output Screenshots
+## Screenshots
 
-_Pending — screenshots will be added after the lab is executed._
+![png1](screenshots/png1.png)
+
+![png2](screenshots/png2.png)
+
+![png3](screenshots/png3.png)
+
+![png4](screenshots/png4.png)
+
+![png5](screenshots/png5.png)
+
+![png6](screenshots/png6.png)
+
+![png7](screenshots/png7.png)
 
 ---
 
-## Key Learnings & Summary
+## Task 1: Helm Commands
 
-_Pending — to be written after completion._
+Run these from the repo root in order. Replace `<namespace>` and names if your environment needs it.
+
+```bash
+cd session-15-helm/homework/helm-package-manager
+
+helm version
+helm repo list
+helm search repo bitnami/nginx
+helm create notes-chart
+cd notes-chart
+ls
+cat Chart.yaml
+cat values.yaml
+cd ..
+
+helm lint notes-chart
+helm template test-render notes-chart
+```
+
+Useful commands covered:
+
+- `helm create`
+- `helm install`
+- `helm list`
+- `helm status`
+- `helm get`
+- `helm upgrade`
+- `helm history`
+- `helm rollback`
+- `helm uninstall`
+- `helm repo`
+- `helm search`
+
+---
+
+## Task 2: Helm Rollback Workflow
+
+Install, upgrade, verify, upgrade again, verify, rollback, verify.
+
+```bash
+helm install notes-dev ./notes-chart
+kubectl get pods
+helm list
+helm status notes-dev
+helm get values notes-dev
+```
+
+Upgrade once:
+
+```bash
+helm upgrade notes-dev ./notes-chart --set replicaCount=2
+kubectl get pods
+helm history notes-dev
+```
+
+Upgrade again and verify:
+
+```bash
+helm upgrade notes-dev ./notes-chart --set service.type=ClusterIP
+kubectl get svc
+helm history notes-dev
+```
+
+Simulate a bad upgrade:
+
+```bash
+helm upgrade notes-dev ./notes-chart --set image.tag=broken-tag-does-not-exist
+kubectl get pods
+kubectl describe pod <pod-name>
+kubectl get events --sort-by=.lastTimestamp
+```
+
+Rollback:
+
+```bash
+helm rollback notes-dev 2
+kubectl get pods
+helm status notes-dev
+helm history notes-dev
+```
+
+---
+
+## Task 3: Mini Project
+
+Use the mini-project chart in the session folder:
+
+```bash
+cd session-15-helm/mini-project/notes-chart
+
+helm lint .
+helm template notes-mini .
+cd ../..
+
+helm install notes-mini ./session-15-helm/mini-project/notes-chart
+kubectl get pods
+kubectl get svc
+kubectl get configmap
+```
+
+Optional: install with production values:
+
+```bash
+helm upgrade notes-mini ./session-15-helm/mini-project/notes-chart -f ./session-15-helm/mini-project/notes-chart/values-prod.yaml
+kubectl get pods
+helm history notes-mini
+```
+
+Clean up when done:
+
+```bash
+helm uninstall notes-mini
+kubectl get pods
+helm list
+```---
+
+## Deliverables
+
+- [ ] `screenshots/png1.png` — Task 1 command practice
+- [ ] `screenshots/png2.png` — Task 1 chart create / lint / template
+- [ ] `screenshots/png3.png` — Task 2 install / status / list
+- [ ] `screenshots/png4.png` — Task 2 upgrade / history
+- [ ] `screenshots/png5.png` — Task 2 bad upgrade
+- [ ] `screenshots/png6.png` — Task 2 rollback / verify
+- [ ] `screenshots/png7.png` — Task 3 mini project
+- [ ] Helm chart, values, templates, install, upgrade, rollback, and README are all complete
+
+---
+
+*Maintained by MD Kaif Molla (24BCS10221) — DevOps Homework Submission*
