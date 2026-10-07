@@ -168,15 +168,17 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f "${PROJECT_DIR}/kubernetes/namespace.yaml"
-          kubectl apply -f "${PROJECT_DIR}/kubernetes/deployment.yaml"
+          sed "s|session17-devsecops:local|session17-devsecops:${GITHUB_SHA}|" \
+            "${PROJECT_DIR}/kubernetes/deployment.yaml" | kubectl apply -f -
           kubectl apply -f "${PROJECT_DIR}/kubernetes/service.yaml"
-          kubectl set image deployment/devsecops-demo \
-            app=session17-devsecops:${GITHUB_SHA} \
-            -n session17
 
       - name: Verify Kubernetes deployment
         run: |
-          kubectl rollout status deployment/devsecops-demo -n session17 --timeout=120s
+          kubectl rollout status deployment/devsecops-demo -n session17 --timeout=180s || {
+            kubectl get pods -n session17 -o wide
+            kubectl describe pods -n session17
+            exit 1
+          }
           kubectl get pods,service -n session17 -o wide
           kubectl port-forward service/devsecops-demo 8080:80 -n session17 > /tmp/session17-port-forward.log 2>&1 &
           for attempt in 1 2 3 4 5; do
