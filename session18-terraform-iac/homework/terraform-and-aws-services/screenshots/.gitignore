@@ -1,0 +1,3 @@
+# Keep raw captures local; commit only the curated png1.png through png5.png files.
+Screenshot*.png
+image.png

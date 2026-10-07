@@ -1,256 +1,112 @@
-# Terraform S3 Bucket Demo
+# Terraform S3 Demo
+
+This project creates one Amazon S3 bucket with Terraform and demonstrates the complete Terraform lifecycle.
 
 ## Project Structure
 
 ```text
 terraform-s3-demo/
-|
-|-- README.md
-|-- terraform.tf
-|-- providers.tf
-|-- variables.tf
-|-- terraform.tfvars
-|-- main.tf
-|-- outputs.tf
-|-- .gitignore
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── provider.tf
+├── terraform.tfvars
+├── terraform.tf
+├── .terraform.lock.hcl
+├── .gitignore
+└── README.md
 ```
 
-## Architecture
+## Files
 
-```text
-terraform.tf
-     |
-     v
-Provider Configuration
-     |
-     v
-variables.tf
-     |
-     v
-terraform.tfvars
-     |
-     v
-main.tf
-     |
-     v
-aws_s3_bucket.demo
-     |
-     v
-AWS S3 Bucket
-     |
-     v
-outputs.tf
-```
+- `provider.tf` configures the AWS Region.
+- `terraform.tf` defines the required Terraform and AWS provider versions.
+- `variables.tf` declares the Region and globally unique bucket-name inputs.
+- `terraform.tfvars` supplies the demonstration values and contains no credentials.
+- `main.tf` creates the S3 bucket and its tags.
+- `outputs.tf` prints the bucket name, ARN, and Region.
 
 ## Prerequisites
 
-Install:
+Install Terraform and AWS CLI, then configure an AWS identity that can manage an S3 bucket.
 
-* Terraform
-* AWS CLI
-
-Configure AWS:
+On macOS, install Terraform if required:
 
 ```bash
-aws configure
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
 ```
 
-Verify:
-
 ```bash
+terraform version
+aws --version
 aws sts get-caller-identity
 ```
 
-## Terraform Workflow
+Never place AWS access keys in Terraform files or commit them to Git.
 
-### 1. Initialize
+## Complete Workflow
+
+Open the project:
+
+```bash
+cd /Users/mdkaif/devops-heros/session18-terraform-iac/terraform-s3-demo
+```
+
+Initialize, format, and validate:
 
 ```bash
 terraform init
-```
-
-Expected:
-
-```text
-Initializing the provider plugins...
-Terraform has been successfully initialized!
-```
-
-### 2. Format
-
-```bash
 terraform fmt
-```
-
-### 3. Validate
-
-```bash
 terraform validate
 ```
 
-Expected:
-
-```text
-Success! The configuration is valid.
-```
-
-### 4. Plan
+Preview and save the execution plan:
 
 ```bash
-terraform plan
+terraform plan -out=tfplan
 ```
 
-Expected:
-
-```text
-Plan: 1 to add, 0 to change, 0 to destroy.
-```
-
-### 5. Apply
+Create the bucket from the reviewed plan:
 
 ```bash
-terraform apply
+terraform apply tfplan
 ```
 
-Terraform asks:
-
-```text
-Do you want to perform these actions?
-  Only 'yes' will be accepted to approve.
-Enter a value:
-```
-
-Enter:
-
-```text
-yes
-```
-
-Expected:
-
-```text
-Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
-Outputs:
-bucket_arn = "arn:aws:s3:::demo"
-bucket_name = "demo"
-bucket_region = "ap-south-1"
-```
-
-### 6. Check State
+Inspect the deployed infrastructure and outputs:
 
 ```bash
+terraform show
 terraform state list
-```
-
-Expected:
-
-```text
-aws_s3_bucket.demo
-```
-
-Inspect the resource:
-
-```bash
 terraform state show aws_s3_bucket.demo
-```
-
-### 7. Check Output
-
-```bash
 terraform output
-```
-
-Or:
-
-```bash
 terraform output bucket_name
 ```
 
-Expected:
-
-```text
-"demo"
-```
-
-### 8. Verify Using AWS CLI
+Verify the bucket directly with AWS CLI:
 
 ```bash
-aws s3 ls
+aws s3api head-bucket --bucket "$(terraform output -raw bucket_name)"
+aws s3api get-bucket-location --bucket "$(terraform output -raw bucket_name)"
 ```
 
-Or:
-
-```bash
-aws s3api head-bucket --bucket demo
-```
-
-### 9. Destroy
-
-After completing the demo:
+Preview deletion and destroy the demonstration resource:
 
 ```bash
 terraform plan -destroy
-```
-
-Then:
-
-```bash
 terraform destroy
 ```
 
-Enter:
-
-```text
-yes
-```
-
-Expected:
+Enter `yes` when Terraform asks for destroy approval. Successful cleanup ends with:
 
 ```text
 Destroy complete! Resources: 1 destroyed.
 ```
 
-## Complete Demo
+## Terraform State
 
-Run:
+Terraform state connects `aws_s3_bucket.demo` in the configuration to the real AWS bucket. Local state and saved plans are ignored by Git because state can contain sensitive infrastructure data. Production teams normally use an encrypted remote backend with access control and state locking.
 
-```bash
-aws sts get-caller-identity
-terraform init
-terraform fmt
-terraform validate
-terraform plan
-terraform apply
-terraform output
-terraform state list
-terraform state show aws_s3_bucket.demo
-terraform plan -destroy
-terraform destroy
-```
+## Cleanup
 
-## Terraform Lifecycle
-
-```text
-              .tf files
-                  |
-                  v
-          terraform init
-                  |
-                  v
-          terraform validate
-                  |
-                  v
-            terraform plan
-                  |
-                  v
-           terraform apply
-                  |
-                  v
-             AWS S3
-                  |
-                  v
-          terraform state
-                  |
-                  v
-          terraform destroy
-```
+Always run `terraform destroy` after the demonstration to avoid leaving resources in the AWS account. The bucket uses `force_destroy = true`, so Terraform can remove objects placed in this homework bucket during testing.
