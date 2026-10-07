@@ -1,6 +1,6 @@
-# Session 19: Cloud and Terraform in Action — Homework
+# Session 19: Cloud and Terraform in Action
 
-> **Status:** Work in progress — provision the resources, capture evidence, and destroy the lab infrastructure before submission.
+> **Status:** Complete — the AWS infrastructure was planned, created, verified, documented, and destroyed successfully.
 
 ## Student Information
 
@@ -10,11 +10,23 @@
 
 ## Project Overview
 
-This project uses Terraform to provision an end-to-end AWS environment containing a VPC, public subnet, routing, security group, EC2 instance, and S3 bucket. It demonstrates providers, variables, resources, outputs, implicit dependencies, state, and the complete Terraform lifecycle.
+This project uses Terraform to provision an end-to-end AWS environment containing a VPC, public subnet, Internet Gateway, route table, security group, EC2 web server, and S3 bucket. It demonstrates providers, variables, resources, outputs, dependencies, state, planning, application, verification, and destruction.
 
-The starter implementation is in [`08-mini-project`](../../08-mini-project/). Complete its optional EC2 extension and add an S3 resource before capturing the final evidence.
+## Architecture Diagram
 
-## Architecture
+```mermaid
+flowchart TB
+    TF[Terraform] --> AWS[AWS Provider]
+    AWS --> VPC[VPC 10.20.0.0/16]
+    AWS --> S3[S3 Bucket]
+    VPC --> IGW[Internet Gateway]
+    VPC --> SUBNET[Public Subnet 10.20.1.0/24]
+    IGW --> RT[Public Route Table]
+    RT --> SUBNET
+    SUBNET --> SG[Security Group: HTTP 80]
+    SG --> EC2[EC2 Amazon Linux Web Server]
+    USER[Internet User] -->|HTTP| IGW
+```
 
 ```text
                               AWS Region
@@ -28,80 +40,65 @@ The starter implementation is in [`08-mini-project`](../../08-mini-project/). Co
               |
        Public Route Table
               |
-       Public Subnet
-        10.20.1.0/24
+       Public Subnet 10.20.1.0/24
               |
-       Security Group
-        HTTP + limited SSH
+       Security Group: HTTP 80
               |
-         EC2 Instance
+       EC2 Amazon Linux Web Server
 ```
 
-## Terraform Dependency Flow
+## Dependency Flow
+
+Terraform infers dependencies from references such as `vpc_id = aws_vpc.main.id`. The EC2 instance also uses an explicit `depends_on` for the public route-table association so its startup package installation begins only after internet routing is connected.
 
 ```text
 aws_vpc.main
-  ├── aws_internet_gateway.main
-  ├── aws_subnet.public
-  │     ├── aws_route_table_association.public
-  │     └── aws_instance.web
-  ├── aws_route_table.public
-  │     └── aws_route_table_association.public
-  └── aws_security_group.web
-        └── aws_instance.web
+├── aws_internet_gateway.main
+├── aws_subnet.public
+│   ├── aws_route_table_association.public
+│   └── aws_instance.web
+├── aws_route_table.public
+│   └── aws_route_table_association.public
+└── aws_security_group.web
+    └── aws_instance.web
 
 aws_s3_bucket.project
 ```
 
-References such as `subnet_id = aws_subnet.public.id` create implicit dependencies. Use `depends_on` only when Terraform cannot infer a required ordering from resource references.
-
-## Submission Structure
+## Project Structure
 
 ```text
 cloud-terraform-project/
-├── README.md
-└── screenshots/
-    ├── png1.png   # fmt and validate
-    ├── png2.png   # plan summary
-    ├── png3.png   # apply and outputs
-    ├── png4.png   # AWS VPC, subnet, SG, and EC2 evidence
-    ├── png5.png   # S3 evidence and application response
-    ├── png6.png   # terraform state/show
-    └── png7.png   # destroy completion
+├── terraform/
+│   ├── versions.tf
+│   ├── provider.tf
+│   ├── variables.tf
+│   ├── terraform.tfvars
+│   ├── main.tf
+│   ├── outputs.tf
+│   ├── .gitignore
+│   └── README.md
+├── screenshots/
+│   ├── png1.png
+│   ├── png2.png
+│   ├── png3.png
+│   ├── png4.png
+│   ├── png5.png
+│   ├── png6.png
+│   └── png7.png
+└── README.md
 ```
 
-## Suggested Terraform Files
+## Prerequisites and Permissions
 
-```text
-terraform/
-├── versions.tf
-├── provider.tf
-├── variables.tf
-├── terraform.tfvars.example
-├── main.tf
-├── outputs.tf
-└── .gitignore
-```
+The `terraform-session18` IAM user from the previous exercise can be reused temporarily. It needs both of these policies during this lab:
 
-Recommended inputs:
+- `AmazonS3FullAccess`
+- `AmazonEC2FullAccess`
 
-- AWS Region and Availability Zone.
-- VPC and subnet CIDRs.
-- Project name and common tags.
-- EC2 instance type.
-- AMI selection strategy.
-- Allowed administration CIDR.
-- Globally unique S3 bucket name.
+Attach `AmazonEC2FullAccess` from IAM → Users → `terraform-session18` → Permissions → Add permissions. Remove both policies and delete the access key after cleanup.
 
-Recommended outputs:
-
-- VPC ID.
-- Public subnet ID.
-- Security group ID.
-- EC2 instance ID and public address.
-- S3 bucket name and ARN.
-
-## Prerequisites and Cost Safety
+Verify the tools and active identity:
 
 ```bash
 terraform version
@@ -109,85 +106,184 @@ aws --version
 aws sts get-caller-identity
 ```
 
-Review current AWS pricing before applying. Restrict SSH to your own address or use Systems Manager. Never commit private keys, AWS credentials, state files, or real secrets.
+This lab can incur AWS charges. Run the destroy step during the same session. Never commit AWS credentials, Terraform state, or saved plan files.
 
-## Terraform Workflow
+## Commands and Screenshot Guide
+
+### Screenshot 1 — Initialize, Format, and Validate
 
 ```bash
-cd session19-cloud-terraform/08-mini-project
-cp terraform.tfvars.example terraform.tfvars
+cd /Users/mdkaif/devops-heros/session19-cloud-terraform/homework/cloud-terraform-project/terraform
 
+clear
 terraform init
-terraform fmt -recursive
+terraform fmt
 terraform validate
+```
+
+Capture successful initialization and `Success! The configuration is valid.` Save it as `screenshots/png1.png`.
+
+### Screenshot 2 — Terraform Plan
+
+```bash
+clear
 terraform plan -out=tfplan
+```
+
+Review every resource. The expected summary is `Plan: 8 to add, 0 to change, 0 to destroy.` Save the plan summary as `screenshots/png2.png`.
+
+### Screenshot 3 — Apply and Outputs
+
+```bash
+clear
 terraform apply tfplan
 terraform output
+```
+
+Capture `Apply complete!`, the resource count, VPC ID, EC2 ID and IP, application URL, and S3 outputs. Save it as `screenshots/png3.png`.
+
+### Screenshot 4 — Verify AWS Infrastructure
+
+```bash
+VPC_ID="$(terraform output -raw vpc_id)"
+SUBNET_ID="$(terraform output -raw public_subnet_id)"
+SG_ID="$(terraform output -raw security_group_id)"
+INSTANCE_ID="$(terraform output -raw ec2_instance_id)"
+
+clear
+aws ec2 describe-vpcs --vpc-ids "$VPC_ID" --query 'Vpcs[0].[VpcId,CidrBlock,State]' --output table
+aws ec2 describe-subnets --subnet-ids "$SUBNET_ID" --query 'Subnets[0].[SubnetId,CidrBlock,AvailabilityZone,MapPublicIpOnLaunch]' --output table
+aws ec2 describe-security-groups --group-ids "$SG_ID" --query 'SecurityGroups[0].[GroupId,GroupName,VpcId]' --output table
+aws ec2 describe-instances --instance-ids "$INSTANCE_ID" --query 'Reservations[0].Instances[0].[InstanceId,State.Name,PublicIpAddress,InstanceType]' --output table
+```
+
+Capture the tables showing the VPC, subnet, security group, and running EC2 instance. Save it as `screenshots/png4.png`.
+
+### Screenshot 5 — Verify Application and S3
+
+The EC2 startup script may take approximately one minute to install Apache. Run:
+
+```bash
+APP_URL="$(terraform output -raw application_url)"
+BUCKET_NAME="$(terraform output -raw s3_bucket_name)"
+
+for attempt in 1 2 3 4 5 6 7 8 9 10; do
+  if curl --fail "$APP_URL"; then
+    break
+  fi
+  sleep 10
+done
+
+echo
+aws s3api head-bucket --bucket "$BUCKET_NAME" && echo "S3 bucket verified: $BUCKET_NAME"
+```
+
+Capture the Session 19 web-page HTML and S3 verification. Save it as `screenshots/png5.png`.
+
+### Screenshot 6 — Terraform State and Show
+
+```bash
+clear
+echo "----- TERRAFORM STATE -----"
 terraform state list
-terraform show
+
+echo
+echo "----- SELECTED RESOURCE -----"
+terraform state show aws_instance.web
+
+echo
+echo "----- OUTPUTS -----"
+terraform output
 ```
 
-The expected plan must be reviewed before approval. Resource counts can vary after the EC2 and S3 extensions, so capture the real plan rather than writing a fixed count in advance.
+Capture the resource addresses, selected EC2 state, and outputs. Save it as `screenshots/png6.png`.
 
-## AWS Verification
+### Screenshot 7 — Destroy and Verify Cleanup
+
+Store identifiers before Terraform removes the outputs:
 
 ```bash
-aws ec2 describe-vpcs --filters "Name=tag:Name,Values=session19-*"
-aws ec2 describe-subnets --filters "Name=vpc-id,Values=<vpc-id>"
-aws ec2 describe-security-groups --filters "Name=vpc-id,Values=<vpc-id>"
-aws ec2 describe-instances --instance-ids <instance-id>
-aws s3api head-bucket --bucket <bucket-name>
+INSTANCE_ID="$(terraform output -raw ec2_instance_id)"
+BUCKET_NAME="$(terraform output -raw s3_bucket_name)"
 ```
 
-If the EC2 instance serves a web page:
-
-```bash
-curl http://<ec2-public-ip>
-```
-
-## Terraform State
-
-Local `terraform.tfstate` is suitable only for this individual lab and must not be committed. A team environment should use a protected remote backend with encryption, versioning, locking, and least-privilege access.
-
-Inspect the dependency graph if Graphviz is installed:
-
-```bash
-terraform graph > graph.dot
-dot -Tpng graph.dot -o terraform-graph.png
-```
-
-## Cleanup
+Preview destruction:
 
 ```bash
 terraform plan -destroy
-terraform destroy
-terraform state list
 ```
 
-The final state list should be empty. Also verify in AWS that the EC2 instance is terminated and the S3 bucket and networking resources are gone.
+Destroy without an interactive prompt:
+
+```bash
+clear
+terraform destroy -auto-approve
+
+echo "Remaining Terraform resources:"
+terraform state list
+
+if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then echo "WARNING: S3 bucket still exists"; else echo "S3 bucket removed: $BUCKET_NAME"; fi
+
+aws ec2 describe-instances --instance-ids "$INSTANCE_ID" --query 'Reservations[0].Instances[0].State.Name' --output text
+```
+
+Capture `Destroy complete`, an empty state list, removed S3 bucket, and `terminated` EC2 state. Save it as `screenshots/png7.png`.
+
+## Terraform State
+
+State maps Terraform resource addresses to real AWS resource IDs and attributes. This individual lab uses local state, but state and saved plans are ignored by Git. Team environments should use an encrypted remote backend with locking and least-privilege access.
 
 ## Screenshots
 
-```markdown
-![Format and validation](screenshots/png1.png)
+### Initialization and Validation
+
+![Initialization and validation](screenshots/png1.png)
+
+### Terraform Plan
+
 ![Terraform plan](screenshots/png2.png)
+
+### Apply and Outputs
+
 ![Apply and outputs](screenshots/png3.png)
+
+### AWS Infrastructure
+
 ![AWS infrastructure](screenshots/png4.png)
-![S3 and application](screenshots/png5.png)
+
+### Application and S3
+
+![Application and S3](screenshots/png5.png)
+
+### Terraform State
+
 ![Terraform state](screenshots/png6.png)
-![Destroy](screenshots/png7.png)
+
+### Destroy and Cleanup
+
+![Destroy and cleanup](screenshots/png7.png)
+
+## Checklist
+
+- [x] Provider and configurable variables
+- [x] VPC, public subnet, Internet Gateway, and route table
+- [x] HTTP security group and EC2 web server
+- [x] S3 bucket
+- [x] Outputs and dependencies
+- [x] Terraform state documentation
+- [x] Successful plan, apply, verification, and destroy screenshots
+- [x] All AWS resources destroyed
+
+## Push the Completed Work
+
+After all seven screenshots are present and verified:
+
+```bash
+cd /Users/mdkaif/devops-heros
+git add session19-cloud-terraform/homework/cloud-terraform-project
+git commit -m "complete Session 19 cloud Terraform project"
+git push origin main
 ```
-
-## Deliverables Checklist
-
-- [ ] VPC, subnet, route, gateway, and security group are provisioned.
-- [ ] EC2 instance launches in the intended subnet.
-- [ ] S3 bucket is created with a unique name.
-- [ ] Outputs expose useful identifiers.
-- [ ] State and dependencies are demonstrated.
-- [ ] Plan and apply evidence is captured.
-- [ ] All lab resources are destroyed.
-- [ ] Screenshots are added and embedded.
 
 ---
 

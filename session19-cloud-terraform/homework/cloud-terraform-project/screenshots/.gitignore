@@ -1,0 +1,3 @@
+# Keep raw captures local and commit only curated numbered screenshots.
+Screenshot*.png
+image.png
