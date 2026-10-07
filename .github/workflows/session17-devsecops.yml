@@ -133,7 +133,7 @@ jobs:
             "${PROJECT_DIR}"
 
       - name: Container Scan - Trivy Security Gate
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: session17-devsecops:${{ github.sha }}
           format: table
