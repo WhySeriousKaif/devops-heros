@@ -1,5 +1,7 @@
 # AWS infrastructure with Terraform
 
+**Author:** MD Kaif Molla
+
 This configuration creates the infrastructure required for the capstone:
 
 - One VPC
@@ -37,4 +39,3 @@ terraform destroy
 EKS worker nodes and the NAT gateway can create AWS charges. Never run `terraform apply` merely to test the syntax, and always run `terraform destroy` after evaluation.
 
 Real AWS credentials, `terraform.tfvars`, state files, and `.terraform/` must never be committed.
-

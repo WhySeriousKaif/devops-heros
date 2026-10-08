@@ -1,5 +1,7 @@
 # DevOps Revision Tracker
 
+**Author:** MD Kaif Molla
+
 DevOps Revision Tracker is a three-tier Python application for organizing difficult exam topics and tracking revision progress. A student can create a topic, assign its category and priority, move it through revision stages, and delete it after completion.
 
 The application domain is original, while its DevOps architecture follows the tools taught during the course.
@@ -374,5 +376,7 @@ The GitHub Actions workflow completed the automated tests, built and security-sc
 </details>
 
 ## Author
+
+**MD Kaif Molla**
 
 Built as the final DevOps capstone project for the Scaler School of Technology DevOps & Cloud course.

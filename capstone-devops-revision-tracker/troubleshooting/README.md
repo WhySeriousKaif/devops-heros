@@ -1,5 +1,7 @@
 # Kubernetes troubleshooting exercises
 
+**Author:** MD Kaif Molla
+
 These manifests deliberately create two common exam problems.
 
 ## Exercise 1: ImagePullBackOff
@@ -44,4 +46,3 @@ Delete the deliberate failures after the exercise:
 kubectl delete -f troubleshooting/broken-image.yaml
 kubectl delete -f troubleshooting/broken-service.yaml
 ```
-

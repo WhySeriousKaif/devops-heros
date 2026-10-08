@@ -1,5 +1,7 @@
 # Viva and exam notes
 
+**Author:** MD Kaif Molla
+
 ## Explain the project in 30 seconds
 
 DevOps Revision Tracker is a React, FastAPI, and PostgreSQL three-tier application. Pytest checks the API before GitHub Actions builds the images. Trivy scans both images, and safe images are pushed to GHCR with commit-SHA tags. Terraform defines AWS VPC and EKS infrastructure. Helm deploys two frontend and two backend replicas with probes, Services, Ingress, HPA, and persistent PostgreSQL storage. Prometheus scrapes `/metrics`, and Grafana displays application behavior.
@@ -55,4 +57,3 @@ kubectl logs <pod> -n <namespace> --previous
 kubectl get events -n <namespace> --sort-by=.lastTimestamp
 kubectl get endpoints <service> -n <namespace>
 ```
-

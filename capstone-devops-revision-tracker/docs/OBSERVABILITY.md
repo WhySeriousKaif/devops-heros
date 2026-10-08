@@ -1,5 +1,7 @@
 # Observability notes
 
+**Author:** MD Kaif Molla
+
 Observability is the ability to understand a system's internal state from the telemetry it produces. It is needed because a distributed application can be running while still being slow, unhealthy, or failing for only some users.
 
 ## The three pillars

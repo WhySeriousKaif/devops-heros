@@ -1,5 +1,7 @@
 # Prometheus and Grafana
 
+**Author:** MD Kaif Molla
+
 The backend exposes Prometheus metrics at `/metrics`. The Helm chart contains a `ServiceMonitor` that tells Prometheus which Service and endpoint to scrape.
 
 ## Install the monitoring stack

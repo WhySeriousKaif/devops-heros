@@ -1,5 +1,7 @@
 # Project Plan
 
+**Author:** MD Kaif Molla
+
 ## Why this application?
 
 The application solves a real student problem: keeping track of difficult DevOps topics during exam preparation. It is intentionally small so the focus remains on the DevOps lifecycle rather than complex application code.
@@ -46,4 +48,3 @@ The application solves a real student problem: keeping track of difficult DevOps
 - Never commit passwords, access keys, tokens, `.env`, `terraform.tfvars`, or Terraform state.
 - Destroy chargeable AWS resources after collecting evidence.
 - Verify every screenshot before making the single final submission.
-

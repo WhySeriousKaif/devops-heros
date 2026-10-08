@@ -1,5 +1,7 @@
 # Argo CD GitOps demo
 
+**Author:** MD Kaif Molla
+
 GitOps uses Git as the source of truth for desired system state. Configuration is declarative, changes are reviewed and committed, and a controller continuously compares the live cluster with Git. If drift occurs, the controller reconciles the cluster back to the declared state.
 
 This project uses `application.yaml` to tell Argo CD to deploy the Helm chart from the `main` branch. Automated synchronization, pruning, and self-healing are enabled.
