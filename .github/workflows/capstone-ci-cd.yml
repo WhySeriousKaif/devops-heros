@@ -1,0 +1,62 @@
+name: DevOps Revision Tracker CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "capstone-devops-revision-tracker/**"
+      - ".github/workflows/capstone-ci-cd.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "capstone-devops-revision-tracker/**"
+      - ".github/workflows/capstone-ci-cd.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies
+        working-directory: capstone-devops-revision-tracker/backend
+        run: pip install -r requirements.txt
+
+      - name: Run backend tests
+        working-directory: capstone-devops-revision-tracker/backend
+        run: pytest -q
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: capstone-devops-revision-tracker/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: capstone-devops-revision-tracker/frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: capstone-devops-revision-tracker/frontend
+        run: npm run build
+
+  build-images:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t revision-tracker-backend:${{ github.sha }} capstone-devops-revision-tracker/backend
+
+      - name: Build frontend image
+        run: docker build -t revision-tracker-frontend:${{ github.sha }} capstone-devops-revision-tracker/frontend
+
