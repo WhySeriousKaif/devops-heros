@@ -59,6 +59,7 @@ GitHub Actions
 | Infrastructure | Terraform, AWS VPC, EKS |
 | Orchestration | Kubernetes, Helm, Ingress, HPA |
 | Observability | Prometheus, Grafana, ServiceMonitor |
+| GitOps | Argo CD continuous reconciliation |
 
 ## Repository structure
 
@@ -71,6 +72,7 @@ capstone-devops-revision-tracker/
 ├── k8s/                    # Namespace manifest
 ├── helm/revision-tracker/  # Kubernetes application package
 ├── monitoring/             # Prometheus values and Grafana dashboard
+├── argocd/                 # Declarative Argo CD Application
 ├── troubleshooting/        # Deliberately broken Kubernetes manifests
 ├── docs/                   # Project plan and revision notes
 └── screenshots/            # Submission evidence
@@ -215,11 +217,24 @@ The chart creates:
 - Backend HPA
 - Optional Prometheus ServiceMonitor
 
-## Monitoring
+## Monitoring and observability
 
-The backend `/metrics` endpoint returns Prometheus-formatted metrics. The Helm ServiceMonitor connects Prometheus to the backend Service, and the Grafana dashboard displays request rate, latency, and HTTP status codes.
+The backend `/metrics` endpoint returns Prometheus-formatted metrics. The Helm ServiceMonitor connects Prometheus to both backend replicas. Grafana displays application health, request rate, CPU, memory, p95 latency, and HTTP status codes. Prometheus rules demonstrate alerting, while Kubernetes application logs demonstrate event-level diagnosis.
 
 See [monitoring/README.md](monitoring/README.md) for the exact commands.
+
+See [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md) for the three pillars—metrics, logs, and traces—why observability is required, common tooling, and Kubernetes-specific practices.
+
+## GitOps with Argo CD
+
+Git is the source of truth for the Helm chart. The declarative Argo CD `Application` continuously compares Git with the cluster and uses automated synchronization, pruning, and self-healing to correct drift.
+
+```bash
+kubectl apply -f argocd/application.yaml
+kubectl get applications -n argocd
+```
+
+The verified demo reports `revision-tracker` as both `Synced` and `Healthy`. See [argocd/README.md](argocd/README.md) for the complete workflow and installation commands.
 
 ## Troubleshooting
 
@@ -251,13 +266,112 @@ The initial findings and remediation are documented in [docs/SECURITY_SCAN.md](d
 
 ## Evidence and submission
 
-The final evidence checklist is in [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). The screenshots below show verified project outcomes; additional application, Kubernetes, Terraform, and monitoring evidence will be added before submission.
+The final evidence checklist is in [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). All screenshots below were captured from the verified local or GitHub run. The Argo CD password screenshot is intentionally excluded because credentials must never be published.
+
+The presentation deck is available at [presentation/devops-revision-tracker-capstone-final.pptx](presentation/devops-revision-tracker-capstone-final.pptx).
 
 ### Successful CI/CD pipeline
 
 The GitHub Actions workflow completed the automated tests, built and security-scanned both container images, published the images to GHCR, and verified the Helm deployment on a kind cluster.
 
 ![Successful GitHub Actions pipeline](screenshots/07-github-actions-success.png)
+
+<details>
+<summary><strong>Complete evidence gallery — 23 screenshots</strong></summary>
+
+### 01 — Application dashboard
+
+![RevisionOS application dashboard](screenshots/01-application-dashboard.png)
+
+### 02 — Swagger API documentation
+
+![FastAPI Swagger documentation](screenshots/02-api-documentation.png)
+
+### 03 — Application health
+
+![Application health endpoint](screenshots/03-application-health.png)
+
+### 04 — Raw Prometheus metrics
+
+![Prometheus metrics endpoint](screenshots/04-prometheus-metrics.png)
+
+### 05 — Automated tests
+
+![Nine passing Pytest tests](screenshots/05-pytest-results.png)
+
+### 06 — Docker Compose services
+
+![Docker containers running](screenshots/06-docker-containers.png)
+
+### 07 — GitHub Actions pipeline
+
+![Successful GitHub Actions pipeline](screenshots/07-github-actions-success.png)
+
+### 08 — Kubernetes pods
+
+![Kubernetes application pods](screenshots/08-kubernetes-pods.png)
+
+### 09 — Kubernetes resources and HPA
+
+![Kubernetes deployments services and HPA](screenshots/09-kubernetes-resources.png)
+
+### 10 — Helm release
+
+![Helm release deployed](screenshots/10-helm-release.png)
+
+### 11 — Terraform validation
+
+![Terraform initialized and validated](screenshots/11-terraform-validation.png)
+
+### 12 — Monitoring stack pods
+
+![Prometheus Grafana and Alertmanager pods](screenshots/12-monitoring-stack-pods.png)
+
+### 13 — Prometheus Kubernetes targets
+
+![Prometheus target overview](screenshots/13-prometheus-targets.png)
+
+### 14 — Grafana available
+
+![Grafana home screen](screenshots/14-grafana-home.png)
+
+### 15 — Application targets UP
+
+![Both backend replicas scraped by Prometheus](screenshots/15-prometheus-application-target.png)
+
+### 16 — Prometheus query
+
+![Application HTTP request metric](screenshots/16-prometheus-query.png)
+
+### 17 — Grafana monitoring dashboard
+
+![Application health CPU memory latency and request metrics](screenshots/17-grafana-dashboard.png)
+
+### 18 — Alert rules created
+
+![PrometheusRule created in Kubernetes](screenshots/18-alert-rule-created.png)
+
+### 19 — Application alert rules
+
+![Backend-down and high-memory alert rules](screenshots/19-prometheus-alert-rules.png)
+
+### 20 — Kubernetes application logs
+
+![Backend health readiness and metrics logs](screenshots/20-kubernetes-application-logs.png)
+
+### 21 — Argo CD components
+
+![Argo CD pods](screenshots/21-argocd-pods.png)
+
+### 22 — GitOps reconciliation status
+
+![Argo CD application synced and healthy](screenshots/22-argocd-synced-healthy.png)
+
+### 23 — Argo CD dashboard
+
+![Argo CD dashboard showing Healthy and Synced](screenshots/23-argocd-dashboard.png)
+
+</details>
 
 ## Author
 

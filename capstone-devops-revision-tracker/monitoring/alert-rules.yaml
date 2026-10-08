@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: revision-tracker-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: revision-tracker.rules
+      rules:
+        - alert: RevisionTrackerBackendDown
+          expr: sum(up{namespace="revision-tracker", job="backend"}) < 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: DevOps Revision Tracker backend is unavailable
+            description: Prometheus cannot reach any healthy backend replica for one minute.
+
+        - alert: RevisionTrackerHighMemory
+          expr: sum(process_resident_memory_bytes{namespace="revision-tracker"}) > 500 * 1024 * 1024
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: DevOps Revision Tracker is using high memory
+            description: Combined backend resident memory has exceeded 500 MiB for five minutes.

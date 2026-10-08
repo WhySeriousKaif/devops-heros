@@ -28,8 +28,8 @@ The Google Form accepts only one submission. Verify every link and screenshot be
 
 ## Terraform
 
-- [ ] `terraform init` screenshot
-- [ ] `terraform validate` screenshot
+- [x] `terraform init` screenshot
+- [x] `terraform validate` screenshot
 - [ ] `terraform plan` screenshot if classroom AWS credentials are available
 - [ ] AWS VPC/EKS screenshots if resources are created
 - [ ] `terraform destroy` evidence after evaluation
@@ -38,20 +38,29 @@ The Google Form accepts only one submission. Verify every link and screenshot be
 
 - [x] All five application Pods show Running
 - [x] Frontend and backend each show two replicas
-- [ ] Services screenshot
-- [ ] Helm release screenshot
+- [x] Services screenshot
+- [x] Helm release screenshot
 - [x] Application accessed through port-forward or Ingress
 
 ## Monitoring
 
-- [ ] `/metrics` output screenshot
-- [ ] Prometheus target shows UP
-- [ ] Grafana dashboard has populated panels
+- [x] `/metrics` output screenshot
+- [x] Prometheus target shows UP
+- [x] Grafana dashboard has populated panels
+- [x] Custom Prometheus alert rules are loaded
+- [x] Kubernetes application logs are captured
+
+## GitOps
+
+- [x] Argo CD is installed
+- [x] Declarative Application manifest is included
+- [x] Automated synchronization, pruning, and self-healing are enabled
+- [x] Application shows Synced and Healthy
 
 ## Documentation and presentation
 
-- [ ] README screenshots have accurate captions
+- [x] README screenshots have accurate captions
 - [x] Architecture and technology stack are explained
-- [ ] Final presentation is included
+- [x] Final presentation is included
 - [ ] Optional one-to-two-minute demonstration video is recorded
 - [ ] Correct SST email, group, roll number, and GitHub repository URL are entered

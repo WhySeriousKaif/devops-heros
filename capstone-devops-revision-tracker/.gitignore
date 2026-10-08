@@ -11,4 +11,4 @@ dist/
 *.tfstate.*
 terraform.tfvars
 .DS_Store
-
+.codex-pptx-build/
