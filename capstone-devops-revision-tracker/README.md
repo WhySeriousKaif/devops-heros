@@ -251,7 +251,13 @@ The initial findings and remediation are documented in [docs/SECURITY_SCAN.md](d
 
 ## Evidence and submission
 
-The final evidence checklist is in [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). Screenshots will be embedded here after the final pipeline and monitoring demonstration.
+The final evidence checklist is in [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). The screenshots below show verified project outcomes; additional application, Kubernetes, Terraform, and monitoring evidence will be added before submission.
+
+### Successful CI/CD pipeline
+
+The GitHub Actions workflow completed the automated tests, built and security-scanned both container images, published the images to GHCR, and verified the Helm deployment on a kind cluster.
+
+![Successful GitHub Actions pipeline](screenshots/07-github-actions-success.png)
 
 ## Author
 

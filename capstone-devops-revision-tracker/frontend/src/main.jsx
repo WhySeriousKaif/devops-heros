@@ -95,54 +95,92 @@ function App() {
   const visibleTopics =
     filter === "ALL" ? topics : topics.filter((topic) => topic.status === filter);
 
+  const completionRate = stats.total
+    ? Math.round((stats.completed / stats.total) * 100)
+    : 0;
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand-mark">DR</div>
-        <div>
-          <strong>DevOps Revision</strong>
-          <span>Exam command center</span>
+        <div className="brand">
+          <div className="brand-mark" aria-hidden="true">
+            <span />
+            <span />
+          </div>
+          <div>
+            <strong>RevisionOS</strong>
+            <span>DevOps learning lab</span>
+          </div>
         </div>
-        <nav>
-          <a className="active" href="#dashboard">Dashboard</a>
-          <a href="#new-topic">Add topic</a>
-          <a href="/docs" target="_blank">API docs</a>
+
+        <nav aria-label="Primary navigation">
+          <p className="nav-label">Workspace</p>
+          <a className="active" href="#dashboard"><span>01</span>Overview</a>
+          <a href="#topics"><span>02</span>Revision queue</a>
+          <a href="#new-topic"><span>03</span>Add topic</a>
+          <a href="/docs" target="_blank" rel="noreferrer"><span>04</span>API explorer</a>
         </nav>
-        <div className="sidebar-note">
-          <span className="online-dot" /> API monitoring enabled
+
+        <div className="environment-card">
+          <div className="environment-heading">
+            <span className="online-dot" />
+            <strong>System healthy</strong>
+          </div>
+          <p>API and PostgreSQL are responding normally.</p>
+          <a href="/health" target="_blank" rel="noreferrer">View health endpoint <span>↗</span></a>
+        </div>
+
+        <div className="sidebar-footer">
+          <div className="avatar">MK</div>
+          <div>
+            <strong>MD Kaif</strong>
+            <span>Capstone workspace</span>
+          </div>
         </div>
       </aside>
 
-      <main>
-        <header id="dashboard">
+      <main className="workspace">
+        <div className="topbar">
+          <p><span>Workspace</span> / Revision tracker</p>
+          <a className="outline-button" href="/docs" target="_blank" rel="noreferrer">Open API docs <span>↗</span></a>
+        </div>
+
+        <header className="hero" id="dashboard">
           <div>
-            <p className="eyebrow">CAPSTONE PROJECT</p>
-            <h1>Revision dashboard</h1>
-            <p>Track difficult topics and move them towards completion.</p>
+            <p className="eyebrow">DEVOPS REVISION TRACKER</p>
+            <h1>Make the hard topics<br />feel manageable.</h1>
+            <p className="hero-copy">A focused workspace for revising commands, tracking difficult concepts, and preparing confidently for the exam.</p>
           </div>
-          <div className="deadline-card">
-            <span>Focus</span>
-            <strong>Hard topics first</strong>
+          <div className="progress-card">
+            <div className="progress-ring" style={{ "--progress": `${completionRate * 3.6}deg` }}>
+              <div><strong>{completionRate}%</strong><span>complete</span></div>
+            </div>
+            <div>
+              <span>Current focus</span>
+              <strong>Hard topics first</strong>
+              <p>{stats.completed} of {stats.total} topics completed</p>
+            </div>
           </div>
         </header>
 
         {error && <div className="error-banner">{error}</div>}
 
         <section className="stats-grid" aria-label="Revision statistics">
-          <StatCard label="Total topics" value={stats.total} tone="blue" />
-          <StatCard label="Not started" value={stats.notStarted} tone="gray" />
-          <StatCard label="In progress" value={stats.inProgress} tone="orange" />
-          <StatCard label="Completed" value={stats.completed} tone="green" />
+          <StatCard index="01" label="Total topics" value={stats.total} tone="ink" />
+          <StatCard index="02" label="Not started" value={stats.notStarted} tone="slate" />
+          <StatCard index="03" label="In progress" value={stats.inProgress} tone="amber" />
+          <StatCard index="04" label="Completed" value={stats.completed} tone="mint" />
         </section>
 
         <section className="content-grid">
-          <div className="panel topic-panel">
+          <div className="panel topic-panel" id="topics">
             <div className="panel-heading">
               <div>
-                <h2>Revision topics</h2>
-                <p>Click a status to move a topic to its next stage.</p>
+                <p className="section-number">01 / REVISION QUEUE</p>
+                <h2>Topics to master</h2>
+                <p>Move each topic forward as your confidence grows.</p>
               </div>
-              <select value={filter} onChange={(event) => setFilter(event.target.value)}>
+              <select aria-label="Filter topics by status" value={filter} onChange={(event) => setFilter(event.target.value)}>
                 <option value="ALL">All statuses</option>
                 <option value="NOT_STARTED">Not started</option>
                 <option value="IN_PROGRESS">In progress</option>
@@ -158,23 +196,26 @@ function App() {
               <div className="topic-list">
                 {visibleTopics.map((topic) => (
                   <article className="topic-row" key={topic.id}>
-                    <div className={`priority priority-${topic.priority.toLowerCase()}`} />
+                    <div className="topic-icon" aria-hidden="true">{topic.category.slice(0, 2).toUpperCase()}</div>
                     <div className="topic-details">
-                      <h3>{topic.title}</h3>
+                      <div className="topic-title-line">
+                        <h3>{topic.title}</h3>
+                        <span className={`badge badge-${topic.priority.toLowerCase()}`}>
+                          {topic.priority} PRIORITY
+                        </span>
+                      </div>
                       <p>{topic.notes || "No notes added"}</p>
                       <div className="topic-meta">
-                        <span>{topic.category}</span>
-                        <span className={`badge badge-${topic.priority.toLowerCase()}`}>
-                          {topic.priority}
-                        </span>
+                        <span className="category-label">{topic.category}</span>
+                        <span>Topic #{String(topic.id).padStart(2, "0")}</span>
                       </div>
                     </div>
                     <div className="row-actions">
                       <button className={`status status-${topic.status.toLowerCase()}`} onClick={() => advanceStatus(topic)}>
-                        {statusLabels[topic.status]}
+                        <span className="status-dot" />{statusLabels[topic.status]}
                       </button>
                       <button className="delete-button" onClick={() => deleteTopic(topic.id)} aria-label={`Delete ${topic.title}`}>
-                        Delete
+                        Remove
                       </button>
                     </div>
                   </article>
@@ -184,9 +225,10 @@ function App() {
           </div>
 
           <form className="panel create-panel" id="new-topic" onSubmit={createTopic}>
-            <div>
-              <p className="eyebrow">NEW REVISION ITEM</p>
-              <h2>Add a topic</h2>
+            <div className="create-heading">
+              <p className="section-number">02 / QUICK CAPTURE</p>
+              <h2>Add a revision topic</h2>
+              <p>Capture a concept while it is fresh. You can refine it later.</p>
             </div>
             <label>
               Topic title
@@ -216,21 +258,26 @@ function App() {
               <textarea rows="4" placeholder="Commands or concepts to practise" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
             </label>
             <button className="primary-button" disabled={saving}>
-              {saving ? "Adding…" : "Add revision topic"}
+              {saving ? "Adding…" : "Add to revision queue"}<span>→</span>
             </button>
           </form>
         </section>
+
+        <footer className="page-footer">
+          <span>RevisionOS / DevOps Capstone</span>
+          <span>FastAPI · React · PostgreSQL · Kubernetes</span>
+        </footer>
       </main>
     </div>
   );
 }
 
 
-function StatCard({ label, value, tone }) {
+function StatCard({ index, label, value, tone }) {
   return (
     <article className={`stat-card tone-${tone}`}>
-      <span>{label}</span>
-      <strong>{value}</strong>
+      <div><span>{index}</span><span>{label}</span></div>
+      <strong>{String(value).padStart(2, "0")}</strong>
     </article>
   );
 }
@@ -241,4 +288,3 @@ createRoot(document.getElementById("root")).render(
     <App />
   </React.StrictMode>,
 );
-
