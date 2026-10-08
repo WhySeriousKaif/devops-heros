@@ -1,0 +1,19 @@
+groups:
+  - name: session20-application
+    rules:
+      - alert: ApplicationNotReady
+        expr: app_health{job="demo-app"} == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: Session 20 demo application is not ready
+          description: The application has reported app_health=0 for more than 10 seconds.
+
+      - alert: ApplicationTargetDown
+        expr: up{job="demo-app"} == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: Prometheus cannot scrape the Session 20 demo application

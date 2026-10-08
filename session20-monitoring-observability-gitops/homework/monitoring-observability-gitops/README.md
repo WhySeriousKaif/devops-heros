@@ -1,6 +1,6 @@
-# Session 20: Monitoring, Observability and GitOps — Homework
+# Session 20: Monitoring, Observability and GitOps
 
-> **Status:** Work in progress — run the demonstrations and add screenshots before submission.
+> **Status:** Implementation complete and statically validated. Run the two demos and capture the seven listed screenshots before submission.
 
 ## Student Information
 
@@ -10,198 +10,307 @@
 
 ## Project Overview
 
-This homework combines service monitoring, the three pillars of observability, and a Kubernetes GitOps workflow. Prometheus collects metrics, Grafana visualizes them, Kubernetes exposes health and logs, and Argo CD continuously reconciles the cluster with the desired state stored in Git.
-
-The supporting examples are in [`03-prometheus`](../../03-prometheus/), [`04-grafana`](../../04-grafana/), and [`08-mini-project`](../../08-mini-project/).
+This project demonstrates monitoring and GitOps using a small instrumented Python service. Prometheus scrapes application metrics, Grafana displays a provisioned dashboard, and Prometheus evaluates a readiness alert. The same application is deployed to a local Kubernetes cluster with health probes and resource controls. A reconciliation process repeatedly applies the declarative state stored in Git and repairs manual drift.
 
 ## Architecture
 
-```text
-Users ---> Kubernetes Service ---> Application Pods
-                                      |     |
-                                /health     +--> stdout/stderr logs
-                                      |
-                                      +--> /metrics
-                                               |
-                                           Prometheus
-                                               |
-                                            Grafana
-                                               |
-                                             Alerts
+```mermaid
+flowchart LR
+    U[Load generator] --> A[Instrumented application]
+    A -->|structured JSON| L[Container/Kubernetes logs]
+    A -->|/metrics| P[Prometheus]
+    P --> G[Grafana dashboard]
+    P --> R[Alert rules]
 
-Git repository ---> Argo CD ---> Kubernetes API
-       ^                 |
-       |                 +---- continuous reconciliation
-       +------ desired state
+    DEV[Developer] -->|commit and review| GIT[(Git: desired state)]
+    GIT --> REC[Reconciler]
+    REC --> K8S[Kubernetes API]
+    K8S --> POD[Application pods]
+    POD -->|liveness/readiness| K8S
 ```
 
-## Submission Structure
+## Repository Structure
 
 ```text
 monitoring-observability-gitops/
-├── README.md
-└── screenshots/
-    ├── png1.png   # Prometheus targets and application metrics
-    ├── png2.png   # Grafana CPU/memory/health dashboard
-    ├── png3.png   # Kubernetes logs and health check
-    ├── png4.png   # Alert firing and recovery
-    ├── png5.png   # Argo CD application Synced/Healthy
-    ├── png6.png   # Git change reconciled into Kubernetes
-    └── png7.png   # GitOps self-healing demonstration
+├── app/
+│   ├── app.py                         # App, health endpoints, metrics and JSON logs
+│   └── Dockerfile
+├── monitoring/
+│   ├── prometheus.yml                 # Scrape configuration
+│   ├── alert-rules.yml                # Readiness and target alerts
+│   └── grafana/
+│       ├── dashboards/session20.json  # CPU, memory, traffic and health dashboard
+│       └── provisioning/              # Automatic dashboard/data-source setup
+├── gitops/
+│   ├── manifests/                     # Declarative Kubernetes desired state
+│   └── reconcile.sh                   # Continuous reconciliation loop
+├── scripts/
+│   ├── demo-monitoring.sh
+│   ├── generate-load.sh
+│   ├── trigger-alert.sh
+│   ├── demo-gitops.sh
+│   └── cleanup.sh
+├── screenshots/
+├── docker-compose.yml
+└── README.md
 ```
 
-## Task 1: Monitoring
+## Prerequisites
 
-Monitoring collects known signals and evaluates them against expected operating conditions.
+- Docker Desktop with at least 3 GiB free disk space
+- Docker Compose v2
+- `curl`, Git, `kubectl`, and Kind
 
-- **Metrics:** numeric time-series measurements such as request rate, latency, errors, CPU, and memory.
-- **Logs:** timestamped event records emitted by applications and infrastructure.
-- **Alerts:** actionable notifications created when a meaningful condition remains true long enough.
-- **Application health:** liveness answers whether the process should restart; readiness answers whether it should receive traffic.
-
-### Kubernetes Checks
+Check them before starting:
 
 ```bash
-kubectl get nodes
-kubectl get pods -A
-kubectl top nodes
-kubectl top pods -A
-kubectl get events -A --sort-by=.lastTimestamp
-kubectl logs deployment/<deployment-name> -n <namespace>
-kubectl describe pod <pod-name> -n <namespace>
+docker version
+docker compose version
+kubectl version --client
+kind version
+git --version
 ```
 
-If `kubectl top` has no data on Minikube:
+## Task 1 — Monitoring Demo
+
+Monitoring answers known questions about system behavior. It collects measurements, presents current and historical state, and notifies operators when defined conditions become abnormal.
+
+| Signal | Meaning | Demonstration in this project |
+|---|---|---|
+| Metrics | Numeric measurements recorded over time | `/metrics`, Prometheus queries and Grafana panels |
+| Logs | Timestamped event records | Structured JSON on stdout and `docker compose logs` |
+| Alerts | Rules that identify actionable abnormal states | `ApplicationNotReady` and `ApplicationTargetDown` |
+| CPU utilization | Processor time consumed per unit of time | Rate of `process_cpu_seconds_total` |
+| Memory utilization | Memory currently used by a process/workload | `process_resident_memory_bytes` |
+| Application health | Whether a process is alive and ready for traffic | `/healthz`, `/readyz`, `app_health`, K8s probes |
+
+### Start and Verify
 
 ```bash
-minikube addons enable metrics-server
-kubectl wait --for=condition=ready pod -l k8s-app=metrics-server -n kube-system --timeout=120s
+cd session20-monitoring-observability-gitops/homework/monitoring-observability-gitops
+./scripts/demo-monitoring.sh
 ```
 
-### Prometheus and Grafana Demo
+The script builds and starts all services, waits for readiness, generates requests and displays target status. No Grafana setup is required.
+
+Open:
+
+- Application: <http://localhost:8080>
+- Prometheus targets: <http://localhost:9090/targets>
+- Prometheus alerts: <http://localhost:9090/alerts>
+- Grafana dashboard: <http://localhost:3000/d/session20-overview>
+
+Useful PromQL queries:
+
+```promql
+up{job="demo-app"}
+rate(process_cpu_seconds_total{job="demo-app"}[1m])
+process_resident_memory_bytes{job="demo-app"}
+rate(app_requests_total{job="demo-app"}[1m])
+rate(app_errors_total{job="demo-app"}[1m])
+app_health{job="demo-app"}
+```
+
+Generate more traffic and inspect structured logs:
 
 ```bash
-cd session20-monitoring-observability-gitops/03-prometheus
-docker compose up -d
-docker compose ps
+./scripts/generate-load.sh
+docker compose logs app --tail=20
+curl --fail http://localhost:8080/healthz
+curl --fail http://localhost:8080/readyz
 ```
 
-Use the configuration and ports documented in that project. Open the Prometheus targets page, verify the application target is `UP`, query CPU and memory metrics, and add useful Grafana panels.
+### Fire and Recover an Alert
 
-Good dashboard signals include:
+```bash
+./scripts/trigger-alert.sh fire
+```
 
-- CPU utilization or CPU usage rate.
-- Working-set memory.
-- Request count/rate.
-- Error ratio.
-- Request duration percentiles.
-- Pod restart count.
-- Application readiness.
+The app immediately reports `app_health 0`. After two scrapes and 10 seconds in the pending state, `ApplicationNotReady` becomes `Firing`. Capture it at the Prometheus alerts page, then recover:
 
-An alert should describe impact, include a useful severity, avoid flapping with an appropriate duration, and link to a runbook where possible.
+```bash
+./scripts/trigger-alert.sh recover
+```
 
-## Task 2: Observability
+The next Prometheus evaluation resolves the alert and Grafana returns to `HEALTHY`.
 
-Observability is the ability to understand a system's internal state using its external signals, including conditions that were not predicted in advance.
+### Health Semantics
+
+- **Liveness** (`/healthz`) answers “should this process be restarted?”
+- **Readiness** (`/readyz`) answers “should this instance receive traffic?”
+- A readiness failure removes a Kubernetes pod from Service endpoints without unnecessarily restarting it.
+- Metrics are for trends and alerting; logs retain event context. Neither replaces the other.
+
+## Task 2 — Observability Documentation
+
+Observability is the ability to infer a system's internal state from the telemetry it emits. Monitoring checks known failure modes; observability also helps investigate unexpected failure modes by letting engineers ask new questions without first changing the application.
 
 ### The Three Pillars
 
-| Pillar | Meaning | Typical tools | Example question |
+| Pillar | What it means | Best suited for | Common tools |
 |---|---|---|---|
-| Metrics | Aggregated numeric time series | Prometheus, CloudWatch, Grafana | Did latency increase after deployment? |
-| Logs | Detailed event records | Loki, Elasticsearch/OpenSearch, CloudWatch Logs | What error did this request produce? |
-| Traces | A request's path across services | OpenTelemetry, Jaeger, Tempo, X-Ray | Which service made this request slow? |
+| **Metrics** | Aggregated numeric time series with labels | Trends, dashboards, SLOs, capacity and alerts | Prometheus, Grafana, CloudWatch, Datadog |
+| **Logs** | Discrete timestamped event records with context | Error details, audits, debugging and event history | Loki, Elasticsearch/OpenSearch, Fluent Bit, CloudWatch Logs |
+| **Traces** | The end-to-end path and timing of one request across services | Finding latency bottlenecks and failed dependencies | OpenTelemetry, Jaeger, Tempo, AWS X-Ray |
 
-The pillars become more useful when they share labels such as service name, environment, version, pod, and trace ID.
+Correlation makes the pillars substantially more useful. A high-latency metric can identify when a problem began, a trace ID can identify the slow request and service, and logs carrying the same trace ID can explain the error.
 
-### Why It Is Required
+### Why Observability Is Required
 
-- Distributed systems fail in combinations that simple uptime checks cannot explain.
-- Engineers need evidence to reduce mean time to detect and recover.
-- Release comparisons reveal regressions.
-- Capacity trends support scaling and cost decisions.
+- Distributed systems have many dependencies and failure combinations.
+- Faster diagnosis lowers mean time to detect (MTTD) and mean time to recover (MTTR).
+- Release and version labels expose regressions after deployment.
+- Capacity trends guide scaling and cost decisions.
 - Service-level indicators and objectives connect telemetry to user experience.
+- Evidence from production replaces guesses during incident response.
 
 ### Kubernetes Observability
 
-Kubernetes adds signals from applications, containers, pods, nodes, controllers, events, and the control plane. Useful practices include structured application logs, resource requests and limits, health probes, cluster-state metrics, node metrics, distributed context propagation, and dashboards grouped by cluster/namespace/workload.
+Kubernetes requires visibility at several layers:
 
-## Task 3: GitOps
+| Layer | Useful telemetry |
+|---|---|
+| Application | Request rate, errors, duration, business metrics, logs and traces |
+| Pod/container | Restarts, CPU throttling, working-set memory, OOM kills and probe failures |
+| Workload | Desired/available replicas, rollout status and autoscaling |
+| Node | CPU, memory, disk, network and node conditions |
+| Control plane | API server latency/errors, scheduler and controller health |
+| Cluster activity | Kubernetes events, audit logs and configuration changes |
 
-GitOps uses a Git repository as the source of truth for declarative system configuration. An agent such as Argo CD compares the declared state with the live state and reconciles drift.
+Typical Kubernetes tools are Metrics Server (`kubectl top`), kube-state-metrics, node-exporter, Prometheus Operator, Grafana, Loki/Fluent Bit and OpenTelemetry Collector. Resource requests and limits, structured logs, health probes, stable labels and trace-context propagation should be designed into each workload.
+
+Useful checks after the GitOps demo starts:
+
+```bash
+kubectl get nodes
+kubectl get pods -n session20 -o wide
+kubectl top nodes
+kubectl top pods -n session20
+kubectl logs deployment/session20-app -n session20 --tail=20
+kubectl describe deployment/session20-app -n session20
+kubectl get events -n session20 --sort-by=.lastTimestamp
+```
+
+`kubectl top` requires Metrics Server; the remaining checks work without it.
+
+## Task 3 — GitOps Demo
+
+GitOps is an operating model in which declarative configuration in Git defines the desired system state. Changes use the normal Git workflow—branch, review, merge and audit history—while a controller continuously compares desired and live state and reconciles differences.
+
+### Four Core Principles
+
+1. **Git is the source of truth:** the committed version records what should run and who changed it.
+2. **Configuration is declarative:** manifests describe the desired result, not an imperative sequence of UI actions.
+3. **Changes are automated:** a reconciler applies approved Git changes to the target environment.
+4. **Reconciliation is continuous:** drift is detected and corrected instead of being allowed to accumulate.
+
+### Workflow
 
 ```text
-Change manifest in Git
-        |
-   Pull request review
-        |
- Merge to main branch
-        |
- Argo CD detects change
-        |
- Sync and health checks
-        |
- Kubernetes reaches desired state
+Edit manifest -> Commit -> Pull request/review -> Merge
+      -> Reconciler detects desired state -> Apply to Kubernetes
+      -> Observe health -> Repeat or roll back with Git
 ```
 
-### Demo
+### Deploy the Git-Declared State
 
 ```bash
-kind create cluster --name session20
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-kubectl wait --for=condition=ready pod --all -n argocd --timeout=300s
+./scripts/demo-gitops.sh
 ```
 
-Update the repository URL in the example Argo CD `Application`, commit the workload manifests to that repository, then apply the bootstrap object:
+This creates a Kind cluster named `session20`, builds and loads the local image, applies the namespace/deployment/service, and waits for two ready replicas.
+
+In Terminal 1, start continuous reconciliation:
 
 ```bash
-kubectl apply -f session20-monitoring-observability-gitops/08-mini-project/app/argocd-application.yaml
-kubectl get applications -n argocd
-kubectl get all -n session20
+./gitops/reconcile.sh --watch
 ```
 
-Change the declared replica count, commit, and push it. Confirm reconciliation:
+The reconciler intentionally requires these manifests to be committed and pauses whenever they contain staged or unstaged edits. This preserves Git—not the working directory—as the approved source of truth.
+
+In Terminal 2, create live-state drift:
 
 ```bash
-kubectl get deployment -n session20 -w
+kubectl scale deployment/session20-app -n session20 --replicas=1
+kubectl get deployment/session20-app -n session20 -w
 ```
 
-To demonstrate self-healing, manually change the live replica count and observe Argo CD restore the Git value:
+Within five seconds, reconciliation restores `replicas: 2`, proving that the declarative repository state wins over an out-of-band cluster change.
+
+To demonstrate a legitimate Git-driven change, edit `gitops/manifests/deployment.yaml` from two to three replicas, review the diff, commit it, and let the reconciler apply it:
 
 ```bash
-kubectl scale deployment session20-mini -n session20 --replicas=1
-kubectl get deployment session20-mini -n session20 -w
+git diff -- gitops/manifests/deployment.yaml
+git add gitops/manifests/deployment.yaml
+git commit -m "Scale Session 20 application to three replicas"
+kubectl get deployment/session20-app -n session20 -w
 ```
+
+Production teams normally use a dedicated controller such as Argo CD or Flux. Those controllers add repository polling/webhooks, health assessment, pruning, multi-cluster support, access controls and a richer audit trail. This small controller keeps the same reconciliation behavior visible for learning.
+
+## Screenshot Guide
+
+Save each image with the exact name shown below.
+
+| File | What to capture | Proof provided |
+|---|---|---|
+| `png1.png` | Prometheus **Status → Targets** with both targets `UP` | Metrics collection |
+| `png2.png` | Provisioned Grafana dashboard after load generation | CPU, memory, traffic and health |
+| `png3.png` | Terminal showing health curls and structured app logs | Logs and application health |
+| `png4.png` | Prometheus alert page with `ApplicationNotReady` firing | Alert evaluation |
+| `png5.png` | Initial Kind workload with deployment `2/2` and two pods | Kubernetes deployment |
+| `png6.png` | Committed replica change and workload reaching `3/3` | Git-driven change |
+| `png7.png` | Manual scale to one followed by automatic return to Git value | Continuous reconciliation/self-healing |
+
+Embed the captured proof here:
+
+### Prometheus Targets
+
+![Prometheus targets](screenshots/png1.png)
+
+### Grafana Monitoring Dashboard
+
+![Grafana CPU, memory, traffic and health](screenshots/png2.png)
+
+### Logs and Health Endpoints
+
+![Application logs and health](screenshots/png3.png)
+
+### Firing Alert
+
+![Prometheus firing alert](screenshots/png4.png)
+
+### Kubernetes Workload
+
+![Kubernetes workload](screenshots/png5.png)
+
+### Git-Driven Deployment
+
+![Git reconciliation](screenshots/png6.png)
+
+### GitOps Self-Healing
+
+![GitOps self-healing](screenshots/png7.png)
 
 ## Cleanup
 
 ```bash
-docker compose down
-kind delete cluster --name session20
+./scripts/cleanup.sh
 ```
 
-## Screenshots
-
-```markdown
-![Prometheus](screenshots/png1.png)
-![Grafana](screenshots/png2.png)
-![Logs and health](screenshots/png3.png)
-![Alert](screenshots/png4.png)
-![Argo CD status](screenshots/png5.png)
-![Git reconciliation](screenshots/png6.png)
-![Self-healing](screenshots/png7.png)
-```
+This stops the Compose stack and deletes only the Kind cluster named `session20`.
 
 ## Deliverables Checklist
 
-- [ ] CPU, memory, logs, and application health are demonstrated.
-- [ ] Prometheus target and Grafana dashboard are working.
-- [ ] An alert firing and recovery are captured.
-- [x] Metrics, logs, traces, tools, and Kubernetes observability are documented.
-- [ ] Argo CD reports the application as Synced and Healthy.
-- [ ] Git-driven deployment and self-healing are demonstrated.
-- [ ] Screenshots are added and embedded.
+- [x] Monitoring demo code for metrics, logs, alerts, CPU, memory and health
+- [x] Pre-provisioned Prometheus and Grafana configuration
+- [x] Observability documentation covering metrics, logs and traces
+- [x] Common observability tools and Kubernetes practices documented
+- [x] GitOps principles, workflow and Kubernetes integration documented
+- [x] Runnable continuous reconciliation and self-healing demo
+- [x] Reproducible commands and cleanup script
+- [ ] Seven runtime screenshots captured and embedded
 
 ---
 

@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: Session 20
+    folder: DevOps Heroes
+    type: file
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards
