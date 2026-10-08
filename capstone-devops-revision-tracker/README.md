@@ -247,6 +247,8 @@ kubectl get
 - Kubernetes database credentials are stored in a Secret rather than a Deployment.
 - CPU and memory requests/limits are defined.
 
+The initial findings and remediation are documented in [docs/SECURITY_SCAN.md](docs/SECURITY_SCAN.md). Both rebuilt runtime images currently pass the configured Trivy HIGH/CRITICAL gate with zero fixed findings.
+
 ## Evidence and submission
 
 The final evidence checklist is in [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). Screenshots will be embedded here after the final pipeline and monitoring demonstration.
@@ -254,4 +256,3 @@ The final evidence checklist is in [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSIO
 ## Author
 
 Built as the final DevOps capstone project for the Scaler School of Technology DevOps & Cloud course.
-
