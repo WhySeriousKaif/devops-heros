@@ -44,6 +44,11 @@ spec:
             - name: http
               containerPort: 8000
           env:
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "revision-tracker.fullname" . }}-application
+                  key: APP_NAME
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:

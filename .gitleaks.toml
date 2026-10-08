@@ -1,0 +1,10 @@
+title = "devops-heros Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Session 12 contains intentionally insecure example Secret manifests used for classroom exercises"
+paths = [
+  '''^session-12-ingress-configmaps-secrets/'''
+]

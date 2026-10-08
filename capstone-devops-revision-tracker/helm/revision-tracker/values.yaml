@@ -9,6 +9,7 @@ backend:
   tag: latest
   pullPolicy: IfNotPresent
   replicaCount: 2
+  appName: DevOps Revision Tracker API
 
 imagePullSecrets: []
 
@@ -50,4 +51,3 @@ monitoring:
   serviceMonitor:
     enabled: false
     interval: 15s
-

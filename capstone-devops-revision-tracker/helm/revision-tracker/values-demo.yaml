@@ -1,0 +1,13 @@
+# Values used for the recorded Kubernetes/Ingress demonstration.
+ingress:
+  enabled: true
+  className: nginx
+  host: revision-tracker.local
+
+hpa:
+  enabled: true
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+    interval: 15s

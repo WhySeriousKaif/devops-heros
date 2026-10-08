@@ -75,6 +75,7 @@ capstone-devops-revision-tracker/
 ├── helm/revision-tracker/  # Kubernetes application package
 ├── monitoring/             # Prometheus values and Grafana dashboard
 ├── argocd/                 # Declarative Argo CD Application
+├── demo/                   # Mandatory presentation deck, video, and recording guide
 ├── troubleshooting/        # Deliberately broken Kubernetes manifests
 ├── docs/                   # Project plan and revision notes
 └── screenshots/            # Submission evidence
@@ -149,15 +150,16 @@ The root workflow `.github/workflows/capstone-ci-cd.yml` runs on every capstone 
 
 1. Install Python dependencies
 2. Run Pytest
-3. Install frontend dependencies
-4. Build the React frontend
-5. Build frontend and backend images
-6. Scan both images using Trivy
-7. Fail on HIGH or CRITICAL fixed vulnerabilities
-8. Push both images to GHCR using the Git commit SHA as the tag
-9. Create a kind testing cluster
-10. Deploy the images using Helm
-11. Verify PostgreSQL, backend, and frontend rollouts
+3. Run Bandit SAST and `pip-audit` SCA
+4. Scan Git history for secrets with Gitleaks
+5. Install frontend dependencies and build the React frontend
+6. Build frontend and backend images
+7. Scan both images using Trivy
+8. Fail on HIGH or CRITICAL fixed vulnerabilities
+9. Push both images to GHCR using the Git commit SHA as the tag
+10. Create a kind testing cluster
+11. Deploy the images using Helm
+12. Verify PostgreSQL, backend, and frontend rollouts
 
 No Docker Hub password or personal access token is stored. The workflow uses the temporary GitHub-provided token.
 
@@ -271,6 +273,8 @@ The initial findings and remediation are documented in [docs/SECURITY_SCAN.md](d
 The final evidence checklist is in [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md). All screenshots below were captured from the verified local or GitHub run. The Argo CD password screenshot is intentionally excluded because credentials must never be published.
 
 The presentation deck is available at [presentation/devops-revision-tracker-capstone-final.pptx](presentation/devops-revision-tracker-capstone-final.pptx).
+
+The mandatory submission assets and step-by-step recording guide are in [`demo/`](demo/). The final video must be saved as `demo/presentation-video.mp4` before submission.
 
 ### Successful CI/CD pipeline
 

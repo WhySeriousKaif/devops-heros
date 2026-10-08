@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "revision-tracker.fullname" . }}-application
+  labels:
+    {{- include "revision-tracker.labels" . | nindent 4 }}
+data:
+  APP_NAME: {{ .Values.backend.appName | quote }}
