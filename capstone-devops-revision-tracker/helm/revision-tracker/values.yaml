@@ -1,0 +1,53 @@
+frontend:
+  image: ghcr.io/whyseriouskaif/revision-tracker-frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+  replicaCount: 2
+
+backend:
+  image: ghcr.io/whyseriouskaif/revision-tracker-backend
+  tag: latest
+  pullPolicy: IfNotPresent
+  replicaCount: 2
+
+imagePullSecrets: []
+
+postgres:
+  image: postgres:16-alpine
+  database: revision_tracker
+  username: revision
+  password: revision
+  storage: 1Gi
+
+ingress:
+  enabled: false
+  className: nginx
+  host: revision-tracker.local
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 60
+
+backendResources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+frontendResources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+monitoring:
+  serviceMonitor:
+    enabled: false
+    interval: 15s
+

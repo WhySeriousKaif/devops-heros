@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: revision-tracker
+  labels:
+    app.kubernetes.io/part-of: devops-revision-tracker
+
