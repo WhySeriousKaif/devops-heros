@@ -76,20 +76,20 @@ jobs:
         run: docker build -t ghcr.io/${{ steps.image.outputs.owner }}/revision-tracker-frontend:${{ github.sha }} capstone-devops-revision-tracker/frontend
 
       - name: Scan backend image with Trivy
-        uses: aquasecurity/trivy-action@v0.32.0
-        with:
-          image-ref: ghcr.io/${{ steps.image.outputs.owner }}/revision-tracker-backend:${{ github.sha }}
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.64.1 image \
+            --no-progress --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 \
+            ghcr.io/${{ steps.image.outputs.owner }}/revision-tracker-backend:${{ github.sha }}
 
       - name: Scan frontend image with Trivy
-        uses: aquasecurity/trivy-action@v0.32.0
-        with:
-          image-ref: ghcr.io/${{ steps.image.outputs.owner }}/revision-tracker-frontend:${{ github.sha }}
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.64.1 image \
+            --no-progress --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 \
+            ghcr.io/${{ steps.image.outputs.owner }}/revision-tracker-frontend:${{ github.sha }}
 
       - name: Push images to GHCR
         if: github.event_name == 'push'
