@@ -1,7 +1,6 @@
 # Kubernetes Storage (Volumes, PV/PVC), HPA & Probes: DevOps Homework
 
-> **Status:** ⏳ Work In Progress — lab execution pending.  
-> Run the commands in each task below, capture the output as screenshots, and drop them into `screenshots/`. Update this README only by pasting your PNGs and confirming the command outputs match expectations.
+> **Status:** Lab executed — all 13 submitted operation screenshots are embedded below. The HPA evidence records the Metrics API issue encountered during execution.
 
 ---
 
@@ -37,15 +36,19 @@ kubernetes-storage-volumes-hpa-probes/
 │   ├── mini-service.yaml
 │   └── mini-hpa.yaml
 └── screenshots/
-    ├── png1.png   # Task 1 — emptyDir + hostPath volume demo
-    ├── png2.png   # Task 2 — PV/PVC/pod persistence demo
-    ├── png3.png   # Task 3 — StorageClass dynamic provisioning
-    ├── png4.png   # Task 4 — HPA scale-out under load
-    ├── png5.png   # Task 5 — Readiness 0/1 failure mode
-    ├── png6.png   # Task 5 — Liveness restart mode
-    ├── png7.png   # Task 6 — mini project resources (all namespaces)
-    ├── png8.png   # Task 6 — persistence after pod delete
-    └── png9.png   # Task 6 — HPA scale-out 2 -> 5
+    ├── png1.png   # emptyDir write and read
+    ├── png2.png   # emptyDir data loss after pod recreation
+    ├── png3.png   # hostPath persistence after pod recreation
+    ├── png4.png   # emptyDir and hostPath comparison
+    ├── png5.png   # PV, PVC and storage pod creation
+    ├── png6.png   # persistent data and pod deletion
+    ├── png7.png   # StorageClass and dynamic PVC creation
+    ├── png8.png   # PVC-backed data after pod recreation
+    ├── png9.png   # dynamically provisioned PVC bound
+    ├── png10.png  # dynamic volume pod and storage resources
+    ├── png11.png  # HPA diagnosis: Metrics API unavailable
+    ├── png12.png  # HPA target remains unknown
+    └── png13.png  # HPA/load-generator cleanup result
 ```
 
 ---
@@ -579,13 +582,93 @@ kubectl get hpa web-app-hpa -n production-webapp -w
 
 ## Execution & Output Screenshots
 
-_Paste your captured PNGs into `screenshots/` using the filenames listed in the Folder Structure above, then keep the README links untouched — they already point at the right files._
+### 1. `emptyDir` Write and Read
+
+The pod is running and the file written to the `emptyDir` volume can be read from the container.
+
+![emptyDir write and read](screenshots/png1.png)
+
+### 2. `emptyDir` Data Is Ephemeral
+
+After deleting and recreating the pod, `/data/message.txt` no longer exists. This demonstrates that `emptyDir` follows the pod lifecycle.
+
+![emptyDir data loss after pod recreation](screenshots/png2.png)
+
+### 3. `hostPath` Data Persists
+
+The `hostPath` pod writes and reads `hostpath.txt`, then reads the same data after pod recreation.
+
+![hostPath persistence](screenshots/png3.png)
+
+### 4. Volume Behavior Comparison
+
+This combined output contrasts lost `emptyDir` data with retained `hostPath` data.
+
+![emptyDir and hostPath comparison](screenshots/png4.png)
+
+### 5. PV, PVC and Storage Pod
+
+The persistent volume, claim and consumer pod are created and inspected.
+
+![PV PVC and pod resources](screenshots/png5.png)
+
+### 6. Persistent Data Test
+
+Student data is written to the mounted volume and the storage pod is deleted as part of the persistence test.
+
+![persistent data and pod deletion](screenshots/png6.png)
+
+### 7. StorageClass and Dynamic PVC
+
+The default `standard` StorageClass is inspected and `dynamic-pvc` is submitted for dynamic provisioning.
+
+![StorageClass and dynamic PVC](screenshots/png7.png)
+
+### 8. PVC Data After Pod Recreation
+
+The storage pod is recreated and the previously written student data is read successfully from the claim.
+
+![PVC data after pod recreation](screenshots/png8.png)
+
+### 9. Dynamic Provisioning Completed
+
+The dynamically provisioned claim and its generated persistent volume are both shown in the `Bound` state.
+
+![dynamically provisioned PVC bound](screenshots/png9.png)
+
+### 10. Dynamic Volume Consumer
+
+The dynamic-volume pod and the associated PV/PVC resources are inspected together.
+
+![dynamic volume consumer and resources](screenshots/png10.png)
+
+### 11. HPA Metrics Diagnosis
+
+The HPA is created with a two-to-five replica range, but the cluster reports `FailedGetResourceMetric` because the Metrics API is unavailable.
+
+![HPA Metrics API diagnosis](screenshots/png11.png)
+
+### 12. HPA Target Status
+
+The HPA remains at two replicas with an `<unknown>/50%` CPU target while metrics are unavailable.
+
+![HPA unknown CPU target](screenshots/png12.png)
+
+### 13. Load Generator Cleanup
+
+The load generator is removed and the final HPA state is recorded. Scaling could not be evaluated without Metrics Server.
+
+![HPA load generator cleanup](screenshots/png13.png)
 
 ---
 
 ## Key Learnings & Summary
 
-_Pending — fill this in after the lab is executed with your own observations._
+- `emptyDir` data is removed with its pod, whereas node-backed and persistent volumes can outlive a pod.
+- A PVC separates an application's storage request from the underlying PV implementation.
+- A default StorageClass can dynamically provision a volume after a compatible consumer is scheduled.
+- HPA requires a working resource Metrics API; without it, CPU targets remain unknown and automatic scale-out cannot occur.
+- Health probes and resource requests are essential inputs for reliable Kubernetes workload management.
 
 ---
 
