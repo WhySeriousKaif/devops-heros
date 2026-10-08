@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: revision_tracker
+      POSTGRES_USER: revision
+      POSTGRES_PASSWORD: revision
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U revision -d revision_tracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - revision-network
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://revision:revision@postgres:5432/revision_tracker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - revision-network
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-3000}:8080"
+    networks:
+      - revision-network
+
+volumes:
+  postgres-data:
+
+networks:
+  revision-network:
+    driver: bridge
