@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: session20-app
     app.kubernetes.io/managed-by: session20-gitops
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: session20-app
