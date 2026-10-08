@@ -1,6 +1,6 @@
 # Session 20: Monitoring, Observability and GitOps
 
-> **Status:** Implementation complete and statically validated. Run the two demos and capture the seven listed screenshots before submission.
+> **Status:** Complete — monitoring, observability, GitOps reconciliation, and all seven evidence screenshots are included.
 
 ## Student Information
 
@@ -310,7 +310,7 @@ This stops the Compose stack and deletes only the Kind cluster named `session20`
 - [x] GitOps principles, workflow and Kubernetes integration documented
 - [x] Runnable continuous reconciliation and self-healing demo
 - [x] Reproducible commands and cleanup script
-- [ ] Seven runtime screenshots captured and embedded
+- [x] Seven runtime screenshots captured and embedded
 
 ---
 
