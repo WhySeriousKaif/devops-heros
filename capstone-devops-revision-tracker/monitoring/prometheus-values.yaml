@@ -1,0 +1,15 @@
+grafana:
+  enabled: true
+  adminPassword: revision-admin
+  service:
+    type: ClusterIP
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    retention: 2d
+
+alertmanager:
+  enabled: true
+

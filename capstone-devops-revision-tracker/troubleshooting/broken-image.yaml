@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: revision-tracker-broken-image
+  namespace: revision-tracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: revision-tracker-broken-image
+  template:
+    metadata:
+      labels:
+        app: revision-tracker-broken-image
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/whyseriouskaif/revision-tracker-backend:tag-does-not-exist
+
