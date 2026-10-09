@@ -34,7 +34,7 @@ kubectl apply -f argocd/application.yaml
 kubectl get applications -n argocd
 ```
 
-The local kind demo overrides the image names to use images already loaded into the cluster. A production environment should use immutable GHCR commit-SHA tags and an image-pull secret when the registry is private.
+The demo pins the public GHCR frontend and backend images to the immutable commit SHA that passed the CI security gates. Private registries would additionally require an image-pull secret.
 
 ## Continuous reconciliation
 

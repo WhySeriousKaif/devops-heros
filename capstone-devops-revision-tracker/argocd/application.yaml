@@ -15,12 +15,12 @@ spec:
       releaseName: revision
       values: |
         frontend:
-          image: revision-tracker-frontend
-          tag: local
+          image: ghcr.io/whyseriouskaif/revision-tracker-frontend
+          tag: b6cd6a53066ce27dd279c00ceec04163153b7a70
           pullPolicy: IfNotPresent
         backend:
-          image: revision-tracker-backend
-          tag: local
+          image: ghcr.io/whyseriouskaif/revision-tracker-backend
+          tag: b6cd6a53066ce27dd279c00ceec04163153b7a70
           pullPolicy: IfNotPresent
         hpa:
           enabled: false

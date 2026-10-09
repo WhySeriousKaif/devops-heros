@@ -283,7 +283,7 @@ The GitHub Actions workflow completed the automated tests, built and security-sc
 ![Successful GitHub Actions pipeline](screenshots/07-github-actions-success.png)
 
 <details>
-<summary><strong>Complete evidence gallery — 23 screenshots</strong></summary>
+<summary><strong>Complete evidence gallery — 37 screenshots</strong></summary>
 
 ### 01 — Application dashboard
 
@@ -376,6 +376,62 @@ The GitHub Actions workflow completed the automated tests, built and security-sc
 ### 23 — Argo CD dashboard
 
 ![Argo CD dashboard showing Healthy and Synced](screenshots/23-argocd-dashboard.png)
+
+### 24 — EKS cluster active
+
+![AWS CLI showing the active EKS cluster](screenshots/24-eks-cluster-active.png)
+
+### 25 — Terraform outputs and EKS nodes
+
+![Terraform outputs and two Ready EKS nodes](screenshots/25-terraform-outputs-and-eks-nodes.png)
+
+### 26 — Application running on EKS
+
+![Backend frontend and PostgreSQL pods running on EKS](screenshots/26-eks-application-pods.png)
+
+### 27 — EKS services, Ingress, HPA, and Helm
+
+![Services LoadBalancer Ingress HPA and deployed Helm release](screenshots/27-eks-services-ingress-hpa-helm.png)
+
+### 28 — Application through AWS LoadBalancer
+
+![RevisionOS accessed through the AWS LoadBalancer](screenshots/28-eks-loadbalancer-application.png)
+
+### 29 — AWS VPC
+
+![Terraform-managed VPC available in Mumbai](screenshots/29-aws-vpc-available.png)
+
+### 30 — AWS EKS cluster
+
+![EKS cluster Active with no health issues](screenshots/30-aws-eks-cluster-active.png)
+
+### 31 — AWS public subnets
+
+![Two public subnets available in separate availability zones](screenshots/31-aws-public-subnets-available.png)
+
+### 32 — AWS managed node group
+
+![EKS managed node group Active with desired size two](screenshots/32-aws-eks-nodegroup-active.png)
+
+### 33 — Final CI/CD run
+
+![Final CI CD run with all jobs successful](screenshots/33-github-actions-final-success.png)
+
+### 34 — Backend Trivy gate
+
+![Backend Trivy report with no security findings](screenshots/34-trivy-backend-clean.png)
+
+### 35 — Frontend Trivy gate
+
+![Frontend Trivy report with zero vulnerabilities](screenshots/35-trivy-frontend-clean.png)
+
+### 36 — Backend GHCR package
+
+![Backend GHCR package with immutable SHA tag](screenshots/36-ghcr-backend-sha-tag.png)
+
+### 37 — Frontend GHCR package
+
+![Frontend GHCR package with immutable SHA tag](screenshots/37-ghcr-frontend-sha-tag.png)
 
 </details>
 
