@@ -16,6 +16,7 @@ The application domain is original, while its DevOps architecture follows the to
 - Check application health and database readiness
 - Expose Prometheus metrics
 - Run locally, in Docker Compose, or in Kubernetes
+this is the new added feature
 
 ## Architecture
 
