@@ -283,7 +283,7 @@ The GitHub Actions workflow completed the automated tests, built and security-sc
 ![Successful GitHub Actions pipeline](screenshots/07-github-actions-success.png)
 
 <details>
-<summary><strong>Complete evidence gallery — 37 screenshots</strong></summary>
+<summary><strong>Complete evidence gallery — 40 screenshots</strong></summary>
 
 ### 01 — Application dashboard
 
@@ -432,6 +432,18 @@ The GitHub Actions workflow completed the automated tests, built and security-sc
 ### 37 — Frontend GHCR package
 
 ![Frontend GHCR package with immutable SHA tag](screenshots/37-ghcr-frontend-sha-tag.png)
+
+### 38 — Live Prometheus targets
+
+![Prometheus scraping both backend replicas successfully](screenshots/38-prometheus-backend-targets-up.png)
+
+### 39 — Live Grafana dashboard
+
+![Grafana dashboard with live application metrics](screenshots/39-grafana-live-dashboard.png)
+
+### 40 — Live Argo CD GitOps status
+
+![Argo CD application shown as Synced and Healthy](screenshots/40-argocd-synced-healthy-live.png)
 
 </details>
 
