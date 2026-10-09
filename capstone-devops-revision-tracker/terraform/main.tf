@@ -31,6 +31,7 @@ module "vpc" {
   tags = local.common_tags
 }
 
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.37.1"
@@ -46,7 +47,8 @@ module "eks" {
 
   eks_managed_node_groups = {
     main = {
-      instance_types = ["t3.medium"]
+      # The classroom account restricts launches to Free Tier-eligible types.
+      instance_types = ["t3.small"]
       min_size       = 1
       max_size       = 3
       desired_size   = 2
@@ -55,4 +57,3 @@ module "eks" {
 
   tags = local.common_tags
 }
-

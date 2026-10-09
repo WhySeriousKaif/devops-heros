@@ -9,7 +9,7 @@ This configuration creates the infrastructure required for the capstone:
 - Two private subnets
 - One NAT gateway
 - One EKS cluster
-- One managed worker node group
+- One managed worker node group with two Free Tier-eligible `t3.small` nodes
 
 ## Commands
 

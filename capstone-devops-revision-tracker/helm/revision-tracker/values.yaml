@@ -19,6 +19,8 @@ postgres:
   username: revision
   password: revision
   storage: 1Gi
+  persistence:
+    enabled: true
 
 ingress:
   enabled: false

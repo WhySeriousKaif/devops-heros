@@ -1,0 +1,19 @@
+# Temporary live-demo overrides for a plain EKS cluster.
+# The default values continue to demonstrate PVC-backed storage.
+postgres:
+  persistence:
+    enabled: false
+
+ingress:
+  enabled: true
+  className: nginx
+  host: ""
+
+hpa:
+  enabled: true
+
+# A ServiceMonitor needs the Prometheus Operator CRD. Monitoring is installed
+# separately by monitoring/install.sh, so it is disabled for this short demo.
+monitoring:
+  serviceMonitor:
+    enabled: false
