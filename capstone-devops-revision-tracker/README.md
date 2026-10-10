@@ -277,6 +277,8 @@ The presentation deck is available at [presentation/devops-revision-tracker-caps
 
 The mandatory submission assets and step-by-step recording guide are in [`demo/`](demo/). The final video must be saved as `demo/presentation-video.mp4` before submission.
 
+**Backup video link:** [Google Drive — Capstone presentation video](https://drive.google.com/file/d/1bsm2uNjUHN20K9VNyWloVf7sT6Tg2AJm/view?usp=sharing)
+
 ### Successful CI/CD pipeline
 
 The GitHub Actions workflow completed the automated tests, built and security-scanned both container images, published the images to GHCR, and verified the Helm deployment on a kind cluster.
