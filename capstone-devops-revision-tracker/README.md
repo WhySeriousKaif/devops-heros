@@ -275,7 +275,7 @@ The final evidence checklist is in [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSIO
 
 The presentation deck is available at [presentation/devops-revision-tracker-capstone-final.pptx](presentation/devops-revision-tracker-capstone-final.pptx).
 
-The mandatory submission assets and step-by-step recording guide are in [`demo/`](demo/). The final video must be saved as `demo/presentation-video.mp4` before submission.
+The mandatory submission assets are in [`demo/`](demo/). The final video is saved as `demo/presentation-video.mp4`.
 
 **Backup video link:** [Google Drive — Capstone presentation video](https://drive.google.com/file/d/1bsm2uNjUHN20K9VNyWloVf7sT6Tg2AJm/view?usp=sharing)
 
