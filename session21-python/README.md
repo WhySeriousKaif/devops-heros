@@ -1,5 +1,7 @@
 # Session 21 — DevOps Final Capstone: TaskBoard (Python)
 
+> **Final project submission:** The Session 21 final-project documentation is available in [homework/final-devops-project/](homework/final-devops-project/README.md). It links to the completed **DevOps Revision Tracker** implementation and its supporting evidence.
+
 ## 1. What we are building
 
 TaskBoard is a small but realistic SaaS-style project management application:
