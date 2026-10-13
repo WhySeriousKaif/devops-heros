@@ -1,6 +1,8 @@
 # Session 21: Final End-to-End DevOps Project — Homework
 
-> **Status:** Work in progress — the project source is present; cloud execution, pipeline evidence, monitoring evidence, and screenshots must be completed before submission.
+> **Completed implementation:** The Session 21 reference architecture is implemented as the **DevOps Revision Tracker** capstone. It uses an original application domain while demonstrating the same required DevSecOps lifecycle: CI/CD, security scanning, Terraform AWS infrastructure, Kubernetes, Helm, observability, and GitOps.
+>
+> **Open the submitted capstone:** [capstone-devops-revision-tracker](../../../capstone-devops-revision-tracker/)
 
 ## Student Information
 
