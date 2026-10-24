@@ -6,7 +6,8 @@ This is the permanent starting point for revision material created while studyin
 
 1. **Final revision before the exam:** [Master Cheat Sheet — Sessions 1–20](../complete-notes/EXAM_MASTER_CHEAT_SHEET_SESSIONS_1_TO_20.md)
 2. **Practise lab commands in Mam's original task order:** [Mam's Lab Command Workbook — Sessions 1–20](../DevOps-Exam-Practice-Quentions/mams-lab-command-cheat-sheets/MAMS_LAB_COMMAND_WORKBOOK_SESSIONS_1_TO_20.md)
-3. **Study one topic in depth:** choose the matching session note below.
+3. **Practise writing configuration files:** [DevOps Configuration Template Reference](DEVOPS_CONFIGURATION_TEMPLATE_REFERENCE.md) — Docker, Compose, Kubernetes, Helm, GitHub Actions, Terraform, monitoring, and GitOps templates.
+4. **Study one topic in depth:** choose the matching session note below.
 
 ## Folder structure
 
